@@ -5,6 +5,8 @@
 
 using namespace std;
 
+#include <QScrollBar>
+
 
 // --- CONSTRUCTOR ---
 TopicWindow::TopicWindow(QWidget *parent) : QWidget(parent), ui(new Ui::TopicWindow) {
@@ -12,10 +14,12 @@ TopicWindow::TopicWindow(QWidget *parent) : QWidget(parent), ui(new Ui::TopicWin
     
     // Connections.
     connect(ui->publishButton, SIGNAL(pressed()), this, SLOT(publishTopic()));
+    connect(ui->publishLineEdit, SIGNAL(returnPressed()), this, SLOT(publishTopic()));
     connect(ui->subscribeCheckBox, SIGNAL(toggled(bool)), this, SLOT(subscriptionStatus(bool)));
     
     // Defaults
     ui->subscribeCheckBox->setChecked(false);
+    ui->subscribeTextEdit->document()->setMaximumBlockCount(100); // Limit paragraphs.
 }
 
 
@@ -115,7 +119,14 @@ void TopicWindow::receiveMessage(string message) {
         i += 8;
     }
     
-    ui->subscribeTextEdit->insertPlainText(text);
+    // Scroll to bottom after inserting text if we are already at the bottom, else leave the scrollbar where it is.
+    if (ui->subscribeTextEdit->verticalScrollBar()->value() == ui->subscribeTextEdit->verticalScrollBar()->maximum()) {
+        ui->subscribeTextEdit->insertPlainText(text);
+        ui->subscribeTextEdit->verticalScrollBar()->triggerAction(QAbstractSlider::SliderToMaximum);
+    }
+    else {
+        ui->subscribeTextEdit->insertPlainText(text);
+    }
 }
 
 

@@ -177,11 +177,7 @@ void MainWindow::addTopic() {
         }
     }
     
-    // Open a new window in the MDI for this topic.
-    //QWidget* w = new QWidget;
-    //Ui::TopicWindow tw;
-    //tw.setupUi(w);
-    
+    // Open a new window in the MDI for this topic.    
     TopicWindow* tw = new TopicWindow(this);
     tw->setTopic(topic);
     topicwindows.insert(std::pair<string, TopicWindow*>(topic.toStdString(), tw));
@@ -190,9 +186,9 @@ void MainWindow::addTopic() {
     connect(tw, SIGNAL(newMessage(string,string)), this, SLOT(publishMessage(string,string)));
     connect(tw, SIGNAL(addSubscription(string)), this, SLOT(addSubscription(string)));
     connect(tw, SIGNAL(removeSubscription(string)), this, SLOT(removeSubscription(string)));
+    connect(tw, SIGNAL(windowClosing(string)), this, SLOT(windowClosing(string)));
             
     QMdiSubWindow* sw = ui->mdiArea->addSubWindow(tw);
-    //sw->setWindowTitle(topic);
     sw->show();
 }
 
@@ -210,11 +206,25 @@ void MainWindow::receiveMessage(string topic, string message) {
     // Check that we have a window with the appropriate topic.
     map<string, TopicWindow*>::const_iterator it;
     it = topicwindows.find(topic);
+    bool found = false;
     if (it == topicwindows.end()) {
-        cerr << "MQTT: message received for unknown topic: " << topic << endl;
+        // Search for partial match (for MQTT # topics).
+        for (it = topicwindows.begin(); it != topicwindows.end(); ++it) {
+            if (it->first.compare(0, it->first.length() - 1, topic, 0, it->first.length() - 1) == 0) {
+                // Matching topic found. Send message.
+                it->second->receiveMessage(message);
+                found = true;
+            }
+        }
         
-        // Remove the subscription.
-        removeSubscription(topic);
+        // If no matching topics were found, try to unsubscribe.
+        // FIXME: If the subscription was from an old # topic, figure out a way to unsubscribe anyway.
+        if (!found) {
+            cerr << "MQTT: message received for unknown topic: " << topic << endl;
+        
+            // Remove the subscription.
+            removeSubscription(topic);
+        }
         
         return;
     }
@@ -242,6 +252,7 @@ void MainWindow::removeSubscription(string topic) {
 // --- WINDOW CLOSING ---
 void MainWindow::windowClosing(string topic) {
     // As the window with the specified topic is closing, we should clean up references to it.
+    cout << "Closing window with topic: " << topic << endl;
     map<string, TopicWindow*>::iterator it;
     it = topicwindows.find(topic);
     if (it == topicwindows.end()) {

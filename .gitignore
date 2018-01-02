@@ -1,0 +1,8 @@
+*.o
+MQTTCute
+MQTTCute.exe
+release/
+debug/
+moc_*
+ui_*
+Makefile
