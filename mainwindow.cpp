@@ -170,13 +170,12 @@ void MainWindow::addTopic() {
     if (topic.isEmpty()) { return; }
     
     // Check that we don't already have this topic.
-    QList<QMdiSubWindow*> sws = ui->mdiArea->subWindowList();
-    for (int i = 0; i < sws.size(); ++i) {
-        if (sws[i]->windowTitle() == topic) {
-            QMessageBox::warning(this, tr("Existing topic"), tr("The selected topic already exists."));
-            return;
-        }
-    }
+    map<string, TopicWindow*>::const_iterator it;
+	it = topicwindows.find(topic.toStdString());
+	if (it != topicwindows.end()) {
+		QMessageBox::warning(this, tr("Existing topic"), tr("The selected topic already exists."));
+		return;
+	}
     
     // Open a new window in the MDI for this topic.    
     TopicWindow* tw = new TopicWindow(this);
@@ -211,13 +210,12 @@ void MainWindow::addDiscovery() {
 	}
     
     // Check that we don't already have this topic.
-    QList<QMdiSubWindow*> sws = ui->mdiArea->subWindowList();
-    for (int i = 0; i < sws.size(); ++i) {
-        if (sws[i]->windowTitle() == topic) {
-            QMessageBox::warning(this, tr("Existing topic"), tr("The selected topic already exists."));
-            return;
-        }
-    }
+    map<string, DiscoveryWindow*>::const_iterator it;
+	it = discoverywindows.find(topic.toStdString());
+	if (it != discoverywindows.end()) {
+		QMessageBox::warning(this, tr("Existing topic"), tr("The selected topic already exists."));
+		return;
+	}
     
     // Open a new window in the MDI for this topic.    
     DiscoveryWindow* dw = new DiscoveryWindow(this);
@@ -256,9 +254,11 @@ void MainWindow::receiveMessage(string topic, string message) {
 	// Search for partial match (for MQTT # topics).
 	for (it = topicwindows.begin(); it != topicwindows.end(); ++it) {
 		if (it->first.compare(0, it->first.length() - 1, topic, 0, it->first.length() - 1) == 0) {
-			// Matching topic found. Send message.
-			it->second->receiveMessage(message);
-			found = true;
+			if (it->first[it->first.length() - 1] == '#') {
+				// Matching topic found. Send message.
+				it->second->receiveMessage(message);
+				found = true;
+			}
 		}
 	}
 	
