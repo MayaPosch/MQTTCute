@@ -30,6 +30,7 @@ private:
     
 private slots:
     void subscriptionStatus(bool status);
+	void clearText();
     
 public slots:
     void receiveMessage(string topic, string message);

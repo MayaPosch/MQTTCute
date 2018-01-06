@@ -6,4 +6,6 @@ release/
 debug/
 moc_*
 ui_*
-Makefile
+Makefile*
+*.pro.user
+*.stash

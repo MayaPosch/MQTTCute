@@ -11,6 +11,7 @@ DiscoveryWindow::DiscoveryWindow(QWidget *parent) : QWidget(parent),
 	
 	// Connections.
     connect(ui->subscribeCheckBox, SIGNAL(toggled(bool)), this, SLOT(subscriptionStatus(bool)));
+	connect(ui->clearButton, SIGNAL(pressed()), this, SLOT(clearText()));
     
     // Defaults
     ui->subscribeCheckBox->setChecked(false);
@@ -35,6 +36,14 @@ void DiscoveryWindow::setTopic(QString topic) {
 void DiscoveryWindow::subscriptionStatus(bool status) {
     if (status) { emit addSubscription(topic); }
     else { emit removeSubscription(topic); }
+}
+
+
+// --- CLEAR TEXT ---
+// Clear the topics found so far.
+void DiscoveryWindow::clearText() {
+	topics.clear();
+	ui->subscribeTextEdit->clear();
 }
 
 

@@ -10,6 +10,10 @@ MQTTCute is an MQTT desktop client written in C++/Qt. Its main focus is on being
 
 ![MQTTCute screenshot](mqttcute.jpg)
 
+## Installing ##
+
+For (64-bit) Windows a binary installer is provided. See the releases page for this project for a download link. This version should work on Windows 7 and up.
+
 ## Building ##
 
 This application should compile and run on any platform which is supported by the Qt 5.x framework and has the Mosquitto client libraries (libmosquitto, libmosquittopp) available for them.
