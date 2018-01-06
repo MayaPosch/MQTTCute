@@ -42,6 +42,8 @@ In order to **subscribe** to a topic, follow the same procedure as above to crea
 
 The received messages will be displayed twice, once in hexadecimal format on the left side, then in text format on the right side.
 
+To **discover** active topics underneath a category, use the `New discovery' toolbar option and fill in a topic that ends with an MQTT wildcard topic ('/#'). In the window that appears one can then check 'subscribe' and the text field will be filled with all active topics on which are currently being published.
+
 ## TODO ##
 
 At this point MQTTCute is still quite barebones. Features that are planned for inclusion are:

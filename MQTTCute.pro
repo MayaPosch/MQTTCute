@@ -15,7 +15,8 @@ TEMPLATE = app
 SOURCES += main.cpp\
     mainwindow.cpp \
     mqttlistener.cpp \
-    topicwindow.cpp
+    topicwindow.cpp \
+    discoverywindow.cpp
 
 win32-g++ {
     SOURCES += mosquitto/lib/cpp/mosquittopp.cpp \
@@ -40,7 +41,8 @@ win32-g++ {
 
 HEADERS  += mainwindow.h \
     mqttlistener.h \
-    topicwindow.h
+    topicwindow.h \
+    discoverywindow.h
 
 win32-g++ {
     HEADERS += mosquitto/lib/cpp/mosquittopp.h \
@@ -62,7 +64,8 @@ win32-g++ {
 }
 
 FORMS    += mainwindow.ui \
-    topicwindow.ui
+    topicwindow.ui \
+    discoverywindow.ui
 
 !win32 {
     LIBS += -lmosquitto -lmosquittopp

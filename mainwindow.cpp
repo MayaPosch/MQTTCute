@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     
     // Add toolbar actions.
     ui->mainToolBar->addAction("New topic", this, SLOT(addTopic()));
+    ui->mainToolBar->addAction("New discovery", this, SLOT(addDiscovery()));
     
     // Defaults.
     mqtt = 0;
@@ -193,6 +194,46 @@ void MainWindow::addTopic() {
 }
 
 
+// --- ADD DISCOVERY ---
+// Open a new discovery window.
+void MainWindow::addDiscovery() {
+    QString topic = QInputDialog::getText(this, tr("Name of topic"), 
+                                           tr("MQTT topic  ending with '/#'"));
+    
+    if (topic.isEmpty()) { return; }
+    
+    // Ensure that the topic name ends with a wildcard,
+    // namely '/#'.
+    if (!topic.endsWith("/#")) {
+		// Throw error.
+		QMessageBox::critical(this, tr("Invalid topic"), tr("Discovery topic has to end with '/#'"));
+		return;
+	}
+    
+    // Check that we don't already have this topic.
+    QList<QMdiSubWindow*> sws = ui->mdiArea->subWindowList();
+    for (int i = 0; i < sws.size(); ++i) {
+        if (sws[i]->windowTitle() == topic) {
+            QMessageBox::warning(this, tr("Existing topic"), tr("The selected topic already exists."));
+            return;
+        }
+    }
+    
+    // Open a new window in the MDI for this topic.    
+    DiscoveryWindow* dw = new DiscoveryWindow(this);
+    dw->setTopic(topic);
+    discoverywindows.insert(std::pair<string, DiscoveryWindow*>(topic.toStdString(), dw));
+    
+    // Add connections.
+    connect(dw, SIGNAL(addSubscription(string)), this, SLOT(addSubscription(string)));
+    connect(dw, SIGNAL(removeSubscription(string)), this, SLOT(removeSubscription(string)));
+    connect(dw, SIGNAL(windowClosing(string)), this, SLOT(windowClosing(string)));
+            
+    QMdiSubWindow* sw = ui->mdiArea->addSubWindow(dw);
+    sw->show();
+}
+
+
 // --- PUBLISH MESSAGE ---
 void MainWindow::publishMessage(string topic, string message) {
     if (!mqtt) { return; }
@@ -207,29 +248,37 @@ void MainWindow::receiveMessage(string topic, string message) {
     map<string, TopicWindow*>::const_iterator it;
     it = topicwindows.find(topic);
     bool found = false;
-    if (it == topicwindows.end()) {
-        // Search for partial match (for MQTT # topics).
-        for (it = topicwindows.begin(); it != topicwindows.end(); ++it) {
-            if (it->first.compare(0, it->first.length() - 1, topic, 0, it->first.length() - 1) == 0) {
-                // Matching topic found. Send message.
-                it->second->receiveMessage(message);
-                found = true;
-            }
-        }
-        
-        // If no matching topics were found, try to unsubscribe.
-        // FIXME: If the subscription was from an old # topic, figure out a way to unsubscribe anyway.
-        if (!found) {
-            cerr << "MQTT: message received for unknown topic: " << topic << endl;
-        
-            // Remove the subscription.
-            removeSubscription(topic);
-        }
-        
-        return;
-    }
-    
-    it->second->receiveMessage(message);
+	if (it != topicwindows.end()) {
+		found = true;
+		it->second->receiveMessage(message);
+	}
+	
+	// Search for partial match (for MQTT # topics).
+	for (it = topicwindows.begin(); it != topicwindows.end(); ++it) {
+		if (it->first.compare(0, it->first.length() - 1, topic, 0, it->first.length() - 1) == 0) {
+			// Matching topic found. Send message.
+			it->second->receiveMessage(message);
+			found = true;
+		}
+	}
+	
+	map<string, DiscoveryWindow*>::const_iterator dit;
+	for (dit = discoverywindows.begin(); dit != discoverywindows.end(); ++dit) {
+		if (dit->first.compare(0, dit->first.length() - 1, topic, 0, dit->first.length() - 1) == 0) {
+			// Matching topic found. Send message.
+			dit->second->receiveMessage(topic, message);
+			found = true;
+		}
+	}
+	
+	// If no matching topics were found, try to unsubscribe.
+	// FIXME: If the subscription was from an old # topic, figure out a way to unsubscribe anyway.
+	if (!found) {
+		cerr << "MQTT: message received for unknown topic: " << topic << endl;
+	
+		// Remove the subscription.
+		removeSubscription(topic);
+	}
 }
 
 

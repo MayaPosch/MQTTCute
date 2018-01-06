@@ -1,6 +1,7 @@
 *.o
 MQTTCute
 MQTTCute.exe
+*.pro.user
 release/
 debug/
 moc_*

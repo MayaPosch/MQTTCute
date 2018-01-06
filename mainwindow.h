@@ -3,9 +3,9 @@
 
 #include <QMainWindow>
 
-//#include <mqtt/qmqtt.h>
 #include "mqttlistener.h"
 #include "topicwindow.h"
+#include "discoverywindow.h"
 
 #include <string>
 #include <map>
@@ -33,6 +33,7 @@ private slots:
     void disconnectRemote();
     void remoteConnected();
     void addTopic();
+    void addDiscovery();
     void publishMessage(string topic, string message);
     void receiveMessage(string topic, string message);
     void addSubscription(string topic);
@@ -50,7 +51,7 @@ private:
     MqttListener* mqtt;
     string ca, cert, key;
     map<string, TopicWindow*> topicwindows;
-    //QMQTT::Client* mqtt_client;
+	map<string, DiscoveryWindow*> discoverywindows;
 };
 
 #endif // MAINWINDOW_H
