@@ -1,14 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <iostream>
+#include "settingsdialog.h"
 
-//#include <QtNetwork/QHostAddress>
+#include <iostream>
+#include <fstream>
+
 #include <QSettings>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QFileDialog>
 #include <QThread>
 #include <QMdiSubWindow>
+#include <QToolBar>
+#include <QStatusBar>
+#include <QAction>
 
 
 // --- CONSTRUCTOR ---
@@ -17,32 +23,53 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     
     // Connect UI options.
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(quit()));
-    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(about()));
+    connect(ui->actionConfigure, SIGNAL(triggered()), this, SLOT(settingsDialog()));
+    connect(ui->actionLoad, SIGNAL(triggered()), this, SLOT(loadSession()));
+    connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(newSession()));
+    connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(editSession()));
+    connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(saveSession()));
     connect(ui->actionConnect, SIGNAL(triggered()), this, SLOT(connectRemote()));
     connect(ui->actionDisconnect, SIGNAL(triggered()), this, SLOT(disconnectRemote()));
+    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(about()));
     
     // Read configuration.
     QCoreApplication::setApplicationName("MQTTCute");
-    QCoreApplication::setApplicationVersion("v0.1");
+    QCoreApplication::setApplicationVersion("v0.2");
     QCoreApplication::setOrganizationName("Nyanko");
     QCoreApplication::setOrganizationDomain("www.nyanko.ws");
     QSettings settings;
-    remoteServer = settings.value("lastRemote", "localhost").toString();
-    remotePort = settings.value("lastPort", 1883).toInt();
-    ca = settings.value("caPath", "").toString().toStdString();
-    cert = settings.value("certPath", "").toString().toStdString();
-    key = settings.value("keyPath", "").toString().toStdString();
+    defaultSession.mqttHost = settings.value("lastRemote", "localhost").toString().toStdString();
+    defaultSession.mqttPort = settings.value("lastPort", 1883).toInt();
+    defaultSession.loginType = (LoginType) settings.value("loginType", LOGIN_TYPE_ANONYMOUS).toInt();
+    defaultSession.caFile = settings.value("caPath", "").toString().toStdString();
+    defaultSession.certFile = settings.value("certPath", "").toString().toStdString();
+    defaultSession.keyFile = settings.value("keyPath", "").toString().toStdString();
+    currentSession = settings.value("currentSession", "default").toString();
     
     // Add toolbar actions.
-    ui->mainToolBar->addAction("New topic", this, SLOT(addTopic()));
-    ui->mainToolBar->addAction("New discovery", this, SLOT(addDiscovery()));
+    QAction* addTopicAction = ui->mainToolBar->addAction("New topic", this, SLOT(addTopic()));
+    QAction* addDiscoveryAction = ui->mainToolBar->addAction("New discovery", this, SLOT(addDiscovery()));
+    //addTopicAction->setEnabled(false);
+    //addDiscoveryAction->setEnabled(false);
+    ui->mainToolBar->setDisabled(true);
+    
+    // Disable menu options which should be unavailable.
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
     
     // Defaults.
     mqtt = 0;
     connected = false;
+    validSession = true;
+    usingDefaultSession = true;
+    loadedSessionPath = "";
     
     // Initialise meta types.
     qRegisterMetaType<string>("string");
+    qRegisterMetaType<Session>("Session");
+    
+    // Attempt to load the previous session, if any.
+    setWindowTitle("MQTTCute - Session: " + currentSession);
 }
 
 
@@ -58,60 +85,77 @@ MainWindow::~MainWindow() {
 void MainWindow::connectRemote() {
     if (connected) { return; }
     
-    QString remote = QInputDialog::getText(this, tr("MQTT broker"), 
-                                           tr("Server URL or IP"),
-                                           QLineEdit::Normal, remoteServer);
-    if (remote.isEmpty()) { return; }
+//    QString remote = QInputDialog::getText(this, tr("MQTT broker"), 
+//                                           tr("Server URL or IP"),
+//                                           QLineEdit::Normal, remoteServer);
+//    if (remote.isEmpty()) { return; }
     
-    int port = QInputDialog::getInt(this, tr("Remote broker port"), 
-                                    tr("Server port"), remotePort);
-    if (remotePort != port || remoteServer != remote) {
-        remotePort = port;
-        remoteServer = remote;
-        QSettings settings;
-        settings.setValue("lastRemote", remoteServer);
-        settings.setValue("lastPort", remotePort);
-    }
+//    int port = QInputDialog::getInt(this, tr("Remote broker port"), 
+//                                    tr("Server port"), remotePort);
+//    if (remotePort != port || remoteServer != remote) {
+//        remotePort = port;
+//        remoteServer = remote;
+//        QSettings settings;
+//        settings.setValue("lastRemote", remoteServer);
+//        settings.setValue("lastPort", remotePort);
+//    }
     
     // Create MQTT listener and set TLS options if appropriate.
     // TODO: make broker ID configurable.
     cout << "Initialising Libmosquitto library...\n";
     mosqpp::lib_init();
-    mqtt = new MqttListener(0, "MQTTCute", remoteServer, remotePort);
+    if (usingDefaultSession) {
+        mqtt = new MqttListener(0, "MQTTCute", QString::fromStdString(defaultSession.mqttHost),
+                                defaultSession.mqttPort);
+    }
+    else {
+        mqtt = new MqttListener(0, "MQTTCute", QString::fromStdString(loadedSession.mqttHost),
+                                loadedSession.mqttPort);
+    }
     
     
-    QMessageBox::StandardButton reply = QMessageBox::question(this, 
-                                                     tr("Connect securily"),
-                                                     tr("Connect using TLS?"),
-                                                     QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
+//    QMessageBox::StandardButton reply = QMessageBox::question(this, 
+//                                                     tr("Connect securily"),
+//                                                     tr("Connect using TLS?"),
+//                                                     QMessageBox::Yes | QMessageBox::No);
+//    if (reply == QMessageBox::Yes) {
         // Set TLS options.
-        QString caFile = QInputDialog::getText(this, tr("CA path"), 
-                                               tr("Full path to CA file."),
-                                               QLineEdit::Normal, 
-                                               QString::fromStdString(ca));
-        QString certFile = QInputDialog::getText(this, tr("Cert path"), 
-                                                 tr("Full path to Cert file."),
-                                                 QLineEdit::Normal, 
-                                                 QString::fromStdString(cert));
-        QString keyFile = QInputDialog::getText(this, tr("Key path"), 
-                                                tr("Full path to Key file."),
-                                                QLineEdit::Normal, 
-                                                QString::fromStdString(key));
-        if (caFile.isEmpty() || certFile.isEmpty() || keyFile.isEmpty()) {
-            // Abort connecting.
+//        QString caFile = QInputDialog::getText(this, tr("CA path"), 
+//                                               tr("Full path to CA file."),
+//                                               QLineEdit::Normal, 
+//                                               QString::fromStdString(ca));
+//        QString certFile = QInputDialog::getText(this, tr("Cert path"), 
+//                                                 tr("Full path to Cert file."),
+//                                                 QLineEdit::Normal, 
+//                                                 QString::fromStdString(cert));
+//        QString keyFile = QInputDialog::getText(this, tr("Key path"), 
+//                                                tr("Full path to Key file."),
+//                                                QLineEdit::Normal, 
+//                                                QString::fromStdString(key));
+//        if (caFile.isEmpty() || certFile.isEmpty() || keyFile.isEmpty()) {
+//            // Abort connecting.
+//            return;
+//        }
+        
+//        QSettings settings;
+//        settings.setValue("caFile", caFile);
+//        settings.setValue("certFile", certFile);
+//        settings.setValue("keyFile", keyFile);
+//        ca = caFile.toStdString();
+//        cert = certFile.toStdString();
+//        key = keyFile.toStdString();
+    if (usingDefaultSession && defaultSession.loginType == LOGIN_TYPE_CERTIFICATE) {
+        if (!mqtt->setTLS(defaultSession.caFile, defaultSession.certFile, defaultSession.keyFile)) {
+            cerr << "SetTLS failed.\n";
+            QMessageBox::critical(this, tr("Setting TLS failed"), 
+                                  tr("Setting the TLS parameters failed.\n\n\
+                               Please check the provided info and try again."));
+            
             return;
         }
-        
-        QSettings settings;
-        settings.setValue("caFile", caFile);
-        settings.setValue("certFile", certFile);
-        settings.setValue("keyFile", keyFile);
-        ca = caFile.toStdString();
-        cert = certFile.toStdString();
-        key = keyFile.toStdString();
-        
-        if (!mqtt->setTLS(ca, cert, key)) {
+    }
+    else if (loadedSession.loginType == LOGIN_TYPE_CERTIFICATE) {
+        if (!mqtt->setTLS(loadedSession.caFile, loadedSession.certFile, loadedSession.keyFile)) {
             cerr << "SetTLS failed.\n";
             QMessageBox::critical(this, tr("Setting TLS failed"), 
                                   tr("Setting the TLS parameters failed.\n\n\
@@ -142,8 +186,15 @@ void MainWindow::connectRemote() {
 void MainWindow::disconnectRemote() {
     if (!connected) { return; }
     
-    mqtt->disconnectBroker();
     QMessageBox::information(this, tr("Disconnected."), tr("Disconnected from remote."));
+    
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    //addTopicAction->setDisabled(true);
+    //addDiscoveryAction->setEnabled(false);
+    ui->mainToolBar->setDisabled(true);
+    
+    mqtt->disconnectBroker();
 }
 
 
@@ -151,6 +202,13 @@ void MainWindow::disconnectRemote() {
 // Called when we successfully connected to the MQTT broker.
 void MainWindow::remoteConnected() {
     QMessageBox::information(this, tr("Connected"), tr("Successfully connected to the MQTT broker."));
+    
+    connected = true;
+    ui->actionConnect->setEnabled(false);
+    ui->actionDisconnect->setEnabled(true);
+//    addTopicAction->setDisabled(false);
+//    addDiscoveryAction->setEnabled(true);
+    ui->mainToolBar->setEnabled(true);
 }
 
 
@@ -158,6 +216,236 @@ void MainWindow::remoteConnected() {
 void MainWindow::errorHandler(QString err) {
     QMessageBox::warning(this, tr("Error"), err);
     connected = false;
+}
+
+
+// --- SETTINGS DIALOG ---
+// Open the settings dialogue.
+void MainWindow::settingsDialog() {
+    SettingsDialog sd;
+    sd.exec();
+}
+
+
+// --- NEW SESSION ---
+void MainWindow::newSession() {
+    // Launch empty session dialogue. If accepted, update our local information.
+    SessionDialog sd;
+    sd.setNewSession(true);
+    connect(&sd, SIGNAL(updatedSession(Session, bool)), this, SLOT(updatedSession(Session, bool)));
+    sd.exec();
+}
+
+
+// --- LOAD SESSION ---
+void MainWindow::loadSession() {
+    // Load a serialised session instance from the provided path.
+    QString filepath = QFileDialog::getOpenFileName(this, tr("Session file..."), loadedSessionPath);
+    if (filepath.isEmpty()) { return; }
+    
+    ifstream FILE(filepath.toStdString(), ios_base::binary);
+    string msg((istreambuf_iterator<char>(FILE)), istreambuf_iterator<char>());
+    FILE.close();
+    if (msg.length() < 15) { return; }
+    
+    int index = 0;
+    Session s;
+    string signature = msg.substr(index, 15);
+    index += 15;
+    if (signature != "MQTTCUTESESSION") {
+        // Abort parsing.
+        QMessageBox::critical(this, tr("Load error"), tr("Failed to load session: invalid signature."));
+        return;
+    }
+    
+    quint32 msglen = *((quint32*) &msg[index]);
+    index += 4;
+    if (msg.length() != (19 + msglen)) {
+        // Abort parsing.
+        QMessageBox::critical(this, tr("Load error"), tr("Failed to load session: invalid message length."));
+        return;
+    }
+    
+    quint8 len = *((quint8*) &msg[index++]);
+    s.mqttHost = msg.substr(index, len);
+    index += len;
+    s.mqttPort = *((quint16*) &msg[index]);
+    index += 2;
+    s.loginType = (LoginType) *((quint8*) &msg[index++]);
+    
+    // Login type determines what next to parse.
+    if (s.loginType == LOGIN_TYPE_ANONYMOUS) {
+        // Nothing more to parse.
+    }
+    else if (s.loginType == LOGIN_TYPE_PASSWORD) {
+        // Get the username and password.
+        // TODO: decrypt username and password data here.
+        len = *((quint8*) &msg[index++]);
+        s.username = msg.substr(index, len);
+        index += len;
+        len = *((quint8*) &msg[index++]);
+        s.password = msg.substr(index, len);
+        index += len;
+    }
+    else if (s.loginType == LOGIN_TYPE_CERTIFICATE) {
+        quint16 len2 = *((quint16*) &msg[index]);
+        index += 2;
+        s.caFile = msg.substr(index, len2);
+        index += len2;
+        
+        len2 = *((quint16*) &msg[index]);
+        index += 2;
+        s.certFile = msg.substr(index, len2);
+        index += len2;
+        
+        len2 = *((quint16*) &msg[index]);
+        index += 2;
+        s.keyFile = msg.substr(index, len2);
+        index += len2;
+    }
+    else {
+        // Unknown type. Abort parsing.
+        QMessageBox::critical(this, tr("Load error"), tr("Failed to load session: invalid login type."));
+        return;
+    }
+    
+    // TODO: Parse open windows.
+        
+    loadedSession = s;
+    
+    usingDefaultSession = false;
+    validSession = true;
+    currentSession = filepath;
+    setWindowTitle("MQTTCute - Session: " + filepath);
+}
+
+
+// --- EDIT SESSION ---
+void MainWindow::editSession() {
+    SessionDialog sd;
+    connect(&sd, SIGNAL(updatedSession(Session, bool)), this, SLOT(updatedSession(Session, bool)));
+    if (usingDefaultSession) {
+        sd.setSessionData(defaultSession);
+    }
+    else {
+        sd.setSessionData(loadedSession);
+    }
+    
+    sd.exec();
+}
+
+
+// --- SAVE SESSION ---
+void MainWindow::saveSession() {
+    // Allow the user to save the current session to a file in a serialised format.
+    if (usingDefaultSession) { return; }
+    
+    if (loadedSessionPath.isEmpty()) {
+        loadedSessionPath = QFileDialog::getSaveFileName(this, tr("Save"));
+        if (loadedSessionPath.isEmpty()) { return; }
+    }
+    
+    cout << "Saving for MQTT host: " << loadedSession.mqttHost << endl;
+    
+    ofstream FILE(loadedSessionPath.toStdString(), ios_base::binary | ios_base::trunc);
+    string signature = "MQTTCUTESESSION";
+    string length;
+    string out;
+    quint8 len;
+    len = loadedSession.mqttHost.length();
+    out += string((const char*) &len, 1);
+    out += loadedSession.mqttHost;
+    out += string((const char*) &(loadedSession.mqttPort), 2);
+    out += string((const char*) &(loadedSession.loginType), 1);
+    if (loadedSession.loginType == LOGIN_TYPE_ANONYMOUS) {
+        // Nothing more to write.
+    }
+    else if (loadedSession.loginType == LOGIN_TYPE_PASSWORD) {
+        // Get the username and password.
+        // TODO: decrypt username and password data here.
+        len = loadedSession.username.length();
+        out += string((const char*) &len, 1);
+        out += loadedSession.username;
+        len = loadedSession.password.length();
+        out += string((const char*) &len, 1);
+        out += loadedSession.password;
+    }
+    else if (loadedSession.loginType == LOGIN_TYPE_CERTIFICATE) {
+        quint16 len2 = loadedSession.caFile.length();
+        out += string((const char*) &len2, 2);
+        out += loadedSession.caFile;
+        
+        len2 = loadedSession.certFile.length();
+        out += string((const char*) &len2, 2);
+        out += loadedSession.certFile;
+            
+        len2 = loadedSession.keyFile.length();
+        out += string((const char*) &len2, 2);
+        out += loadedSession.keyFile;
+    }
+    
+    // Calculate length, write to file.
+    quint32 l = out.length();
+    length = string((const char*) &l, 4);
+    
+    FILE.write(signature.data(), signature.length());
+    FILE.write(length.data(), length.length());
+    FILE.write(out.data(), out.length());
+    FILE.close();
+    
+    savedSession = true;
+}
+
+
+// --- LOAD SESSION ---
+// Load an existing session.
+//bool MainWindow::loadSession(QString path, Session &s) {
+//    //
+    
+    
+//    usingDefaultSession = false;
+//    validSession = true;
+//}
+
+
+// --- SAVE SESSION ---
+//bool MainWindow::saveSession(QString path, Session &s) {
+//    // 
+//}
+
+
+// --- UPDATED SESSION ---
+// Called when the session has been updated.
+void MainWindow::updatedSession(Session s, bool newSession) {
+    cout << "Updating session for broker: " << s.mqttHost << endl;
+    
+    if (newSession) {
+        // Replace the session.
+        savedSession = false;
+        usingDefaultSession = false;
+        loadedSessionPath.clear();
+    }
+    
+    // Check whether we need to replace or update the current session info.
+    if (usingDefaultSession) {
+        // Just update the QSettings object.
+        QSettings settings;
+        settings.setValue("lastRemote", QString::fromStdString(s.mqttHost));
+        settings.setValue("lastPort", s.mqttPort);
+        settings.setValue("loginType", (quint8) s.loginType);
+        settings.setValue("caFile", QString::fromStdString(s.caFile));
+        settings.setValue("certFile", QString::fromStdString(s.certFile));
+        settings.setValue("keyFile", QString::fromStdString(s.keyFile));
+        
+        defaultSession = s;
+    }
+    else {        
+        // Update session info.
+        loadedSession = s;
+        
+        // Update the saved session information.
+        saveSession();
+    }
 }
 
 
@@ -316,7 +604,18 @@ void MainWindow::windowClosing(string topic) {
 // --- ABOUT ---
 // Display an 'about' dialogue.
 void MainWindow::about() {
-    QMessageBox::about(this, tr("About"), tr("MQTTCute MQTT client v0.1 Alpha.\n(c) 2018 Maya Posch.\nwww.mayaposch.com"));
+    QMessageBox::about(this, tr("About"), tr("MQTTCute MQTT client v0.2 Alpha.\n(c) 2018 Maya Posch.\nwww.mayaposch.com"));
+}
+
+
+// --- CLOSE EVENT ---
+// Handle the window being closed by the user.
+void MainWindow::closeEvent(QCloseEvent *event) {
+    if (mqtt) {
+        mqtt->disconnectBroker();
+    }
+    
+    event->accept();
 }
 
 

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>img/mqtticon-large.png</file>
+    </qresource>
+</RCC>

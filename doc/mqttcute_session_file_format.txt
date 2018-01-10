@@ -1,0 +1,41 @@
+MQTTCute
+Session file format
+---
+
+uint8 (8)	MQTTCUTE
+uint8 (6)	SESSION
+uint32		Bytes following this field.
+uint8		Length of MQTT broker address string.
+uint8 (*)	MQTT broker address string.
+uint16		MQTT broker port.
+uint8		Login type: 0: Anonymous, 1: Password, 2: Certificate.
+<login data>
+<open topics>
+
+
+> Login data:
+
+* Anonymous:
+No further data.
+
+* Password:
+uint8		Length of username string.
+uint8 (*)	Username string.
+uint8		Length of password string.
+uint8 (*)	Password string.
+
+* Certificate:
+uint16		Length of CA file string.
+uint8 (*)	CA file string (path).
+uint16		Length of Cert file string.
+uint8 (*)	Cert file string (path).
+uint16		Length of Key file string.
+uint8 (*)	Key file string (path).
+
+
+> Open topics:
+
+uint8 (5)	TOPIC
+uint8		Type of window (0: topic, 1: discovery).
+uint16		Length of topic string.
+uint8 (*)	Topic string.

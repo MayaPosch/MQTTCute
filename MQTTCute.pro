@@ -16,7 +16,9 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     mqttlistener.cpp \
     topicwindow.cpp \
-    discoverywindow.cpp
+    discoverywindow.cpp \
+    sessiondialog.cpp \
+    settingsdialog.cpp
 
 win32-g++ {
     SOURCES += mosquitto/lib/cpp/mosquittopp.cpp \
@@ -42,7 +44,9 @@ win32-g++ {
 HEADERS  += mainwindow.h \
     mqttlistener.h \
     topicwindow.h \
-    discoverywindow.h
+    discoverywindow.h \
+    sessiondialog.h \
+    settingsdialog.h
 
 win32-g++ {
     HEADERS += mosquitto/lib/cpp/mosquittopp.h \
@@ -65,7 +69,9 @@ win32-g++ {
 
 FORMS    += mainwindow.ui \
     topicwindow.ui \
-    discoverywindow.ui
+    discoverywindow.ui \
+    sessiondialog.ui \
+    settingsdialog.ui
 
 !win32 {
     LIBS += -lmosquitto -lmosquittopp
@@ -76,5 +82,7 @@ win32:CONFIG(debug, debug|release): LIBS += -lws2_32
 win32-msvc:CONFIG(release, debug|release): LIBS += -L$$PWD/mosquitto/msvc_2017_x64/
 win32-msvc:CONFIG(debug, debug|release): LIBS += -L$$PWD/mosquitto/msvc_2017_x64/
 
-#INCLUDEPATH += $$PWD/mosquitto
-#DEPENDPATH += $$PWD/mosquitto
+RESOURCES += \
+    images.qrc
+
+win32:RC_ICONS += img/mqtticon-large.png

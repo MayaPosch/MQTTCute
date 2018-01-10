@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>MQTTCute</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="images.qrc">
+    <normaloff>:/img/img/mqtticon-large.png</normaloff>:/img/img/mqtticon-large.png</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
@@ -39,9 +43,10 @@
     <property name="title">
      <string>Session</string>
     </property>
+    <addaction name="actionNew"/>
+    <addaction name="actionEdit"/>
     <addaction name="actionSave"/>
     <addaction name="actionLoad"/>
-    <addaction name="actionNew"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -55,9 +60,15 @@
     </property>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
-    <addaction name="actionInfo"/>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionConfigure"/>
    </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuSettings"/>
    <addaction name="menuSession"/>
    <addaction name="menuServer"/>
    <addaction name="menuHelp"/>
@@ -111,8 +122,20 @@
     <string>Info</string>
    </property>
   </action>
+  <action name="actionConfigure">
+   <property name="text">
+    <string>Configure...</string>
+   </property>
+  </action>
+  <action name="actionEdit">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>

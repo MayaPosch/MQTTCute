@@ -6,6 +6,7 @@
 #include "mqttlistener.h"
 #include "topicwindow.h"
 #include "discoverywindow.h"
+#include "sessiondialog.h"
 
 #include <string>
 #include <map>
@@ -15,6 +16,7 @@ using namespace std;
 
 // Meta type registration for signal/slots.
 Q_DECLARE_METATYPE(string)
+Q_DECLARE_METATYPE(Session)
 
 
 namespace Ui {
@@ -29,6 +31,11 @@ public:
     ~MainWindow();
     
 private slots:
+    void settingsDialog();
+    void newSession();
+    void loadSession();
+    void editSession();
+    void saveSession();
     void connectRemote();
     void disconnectRemote();
     void remoteConnected();
@@ -43,14 +50,32 @@ private slots:
     void about();
     void quit();
     
+public slots:
+    void updatedSession(Session s, bool newSession);
+    
 private:
     Ui::MainWindow *ui;
+    QAction* addTopicAction;
+    QAction* addDiscoveryAction;
     bool connected;
-    QString remoteServer;
-    int remotePort;
+    Session defaultSession;
+    Session loadedSession;
+    QString loadedSessionPath;
+    bool validSession;
+    bool savedSession;
+    bool usingDefaultSession;
+    QString currentSession;
+    //QString remoteServer;
+    //int remotePort;
     MqttListener* mqtt;
-    string ca, cert, key;
+    //string ca, cert, key;
     map<string, TopicWindow*> topicwindows;
+    
+    //bool loadSession(QString path, Session &s);
+    //bool saveSession(QString path, Session &s);
+    
+protected:
+    void closeEvent(QCloseEvent *event);
 	map<string, DiscoveryWindow*> discoverywindows;
 };
 

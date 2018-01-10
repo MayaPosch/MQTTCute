@@ -2,13 +2,13 @@
 
 **Author:** Maya Posch
 
-**Date:** 2018/01/01
+**Date:** 2018/01/10
 
 ## Overview ##
 
 MQTTCute is an MQTT desktop client written in C++/Qt. Its main focus is on being helpful with the debugging and monitoring of MQTT-based systems which use binary protocols.
 
-![MQTTCute screenshot](mqttcute.jpg)
+![MQTTCute screenshot](mqttcute_v02.jpg)
 
 ## Installing ##
 
@@ -48,11 +48,14 @@ The received messages will be displayed twice, once in hexadecimal format on the
 
 To **discover** active topics underneath a category, use the `New discovery' toolbar option and fill in a topic that ends with an MQTT wildcard topic ('/#'). In the window that appears one can then check 'subscribe' and the text field will be filled with all active topics on which are currently being published.
 
+Use the menu options underneath **Session** to load sessions and create new ones. Currently sessions do not yet save open windows.
+
 ## TODO ##
 
 At this point MQTTCute is still quite barebones. Features that are planned for inclusion are:
 
 * Better and customisable received message formatting and copying.
 * History function and loading of external files for publishing.
-* Client sessions.
+* Save open window state in session files.
+* Encrypt usernames and passwords for MQTT brokers in session files.
 * Etc.
