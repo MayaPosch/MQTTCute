@@ -85,4 +85,4 @@ win32-msvc:CONFIG(debug, debug|release): LIBS += -L$$PWD/mosquitto/msvc_2017_x64
 RESOURCES += \
     images.qrc
 
-win32:RC_ICONS += img/mqtticon-large.png
+#win32:RC_ICONS += img/mqtticon-large.png

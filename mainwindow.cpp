@@ -164,6 +164,28 @@ void MainWindow::connectRemote() {
             return;
         }
     }
+	
+	if (usingDefaultSession && defaultSession.loginType == LOGIN_TYPE_PASSWORD) {
+		if (!mqtt->setPassword(defaultSession.username, defaultSession.password)) {
+			cerr << "Setting username/password failed.\n";
+            QMessageBox::critical(this, tr("Setting username/password failed"), 
+                                  tr("Setting the username and/or password failed.\n\n\
+                               Please check the provided info and try again."));
+            
+            return;
+		}
+		
+	}
+	else if (loadedSession.loginType == LOGIN_TYPE_PASSWORD) {
+		if (!mqtt->setPassword(loadedSession.username, loadedSession.password)) {
+			cerr << "Setting username/password failed.\n";
+            QMessageBox::critical(this, tr("Setting username/password failed"), 
+                                  tr("Setting the username and/or password failed.\n\n\
+                               Please check the provided info and try again."));
+            
+            return;
+		}
+	}
     
     // Try to connect. If successful, update local copy and stored remote server address.
     // The MQTT client class has to run on its own thread since it uses its own event loop.
@@ -216,6 +238,11 @@ void MainWindow::remoteConnected() {
 void MainWindow::errorHandler(QString err) {
     QMessageBox::warning(this, tr("Error"), err);
     connected = false;
+	
+	// Reset UI elements.
+	ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    ui->mainToolBar->setDisabled(true);
 }
 
 

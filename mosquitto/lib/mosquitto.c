@@ -26,7 +26,7 @@ Contributors:
 #else
 #include <winsock2.h>
 #include <windows.h>
-typedef int ssize_t;
+//typedef int ssize_t;
 #endif
 
 #include "mosquitto.h"

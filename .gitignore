@@ -9,3 +9,5 @@ ui_*
 Makefile*
 *.pro.user
 *.stash
+*.Release
+*.Debug

@@ -51,9 +51,31 @@ bool MqttListener::setTLS(string &ca, string &cert, string &key) {
 }
 
 
+// --- SET PASSWORD ---
+// Set the username and password for this MQTT connection.
+bool MqttListener::setPassword(string &username, string &password) {
+	int res = username_pw_set(username.c_str(), password.c_str());
+	if (res != MOSQ_ERR_SUCCESS) {
+		if (res == MOSQ_ERR_INVAL) {
+            cerr << "Invalid input parameters for Mosquitto PW.\n";
+        }
+        else if (res == MOSQ_ERR_NOMEM) {
+            cerr << "Out of memory on Mosquitto PW.\n";
+        }
+        else {
+            cerr << "Unknown Mosquitto PW error.\n";
+        }
+        
+        return false; 
+	}
+	
+	return true;
+}
+
+
 // --- CONNECT BROKER ---
 void MqttListener::connectBroker() {
-    cout << "Connecting to broker..." << host.toStdString() << ":" << port << "\n";
+    cout << "Connecting to broker: " << host.toStdString() << ":" << port << "\n";
     int keepalive = 60;
     mosqpp::mosquittopp::connect(host.toStdString().c_str(), port, keepalive);
     
