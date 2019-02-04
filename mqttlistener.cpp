@@ -169,11 +169,13 @@ void MqttListener::publishMessage(string topic, string msg) {
 
 // --- ADD SUBSCRIPTION ---
 void MqttListener::addSubscription(string topic) {
+	cout << "MqttListener: Adding subscription for: " << topic << endl;
     subscribe(0, topic.c_str(), 1);
 }
 
 
 // --- REMOVE SUBSCRIPTION ---
 void MqttListener::removeSubscription(string topic) {
+	cout << "MqttListener: Removing subscription for: " << topic << endl;
     unsubscribe(0, topic.c_str());
 }

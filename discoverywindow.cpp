@@ -49,7 +49,7 @@ void DiscoveryWindow::clearText() {
 
 // --- RECEIVE MESSAGE ---
 // Called when a new message is available.
-void DiscoveryWindow::receiveMessage(string topic, string message) {
+void DiscoveryWindow::receiveMessage(string topic, string /*message*/) {
 	set<string>::const_iterator it;
 	it = topics.find(topic);
 	if (it == topics.end()) {

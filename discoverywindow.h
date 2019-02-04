@@ -33,7 +33,7 @@ private slots:
 	void clearText();
     
 public slots:
-    void receiveMessage(string topic, string message);
+    void receiveMessage(string topic, string);
     
 signals:
     void addSubscription(string topic);
