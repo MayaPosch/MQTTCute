@@ -20,6 +20,10 @@ TopicWindow::TopicWindow(QWidget *parent) : QWidget(parent), ui(new Ui::TopicWin
     // Defaults
     ui->subscribeCheckBox->setChecked(false);
     ui->subscribeTextEdit->document()->setMaximumBlockCount(100); // Limit paragraphs.
+    QFont font("Monospace");
+    font.setStyleHint(QFont::TypeWriter);
+    ui->subscribeTextEdit->setFont(font);
+    this->setFixedWidth(320);
 }
 
 
@@ -106,13 +110,13 @@ void TopicWindow::receiveMessage(string message) {
             line += " ";
         }
         
-        if (line.length() < 16) {
+        if (line.length() < 24) {
             // Add padding.
-            while (line.length() < 16) { line += " "; }
+            while (line.length() < 24) { line += "\u2007"; } // using U+2007   FIGURE SPACE
         }
         
         text += line;
-        text += "\t";
+        text += "\u2007\u2007\u2007\u2007";
         text += QString::fromStdString(temp);
         text += "\n";
         

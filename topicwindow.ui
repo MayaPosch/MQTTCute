@@ -6,9 +6,33 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>274</width>
+    <width>320</width>
     <height>292</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>320</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>320</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>320</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Topic</string>
@@ -41,6 +65,14 @@
    </item>
    <item>
     <widget class="QTextEdit" name="subscribeTextEdit">
+     <property name="font">
+      <font>
+       <family>Courier</family>
+      </font>
+     </property>
+     <property name="lineWrapMode">
+      <enum>QTextEdit::FixedColumnWidth</enum>
+     </property>
      <property name="readOnly">
       <bool>true</bool>
      </property>

@@ -8,6 +8,7 @@ moc_*
 ui_*
 Makefile*
 *.pro.user
+*.pro.user*
 *.stash
 *.Release
 *.Debug
