@@ -102,6 +102,18 @@ void MainWindow::connectRemote() {
     
     // Create MQTT listener and set TLS options if appropriate.
     // TODO: make broker ID configurable.
+#ifdef USE_NMQTT
+	cout << "Initialising NymphMQTT library...\n";
+	mqtt = new NmqttListener(this);
+	if (usingDefaultSession) {
+		mqtt->init("MQTTCute", QString::fromStdString(defaultSession.mqttHost),
+                                defaultSession.mqttPort);
+    }
+    else {
+		mqtt->init("MQTTCute", QString::fromStdString(loadedSession.mqttHost),
+                                loadedSession.mqttPort);
+    }
+#else
     cout << "Initialising Libmosquitto library...\n";
     mosqpp::lib_init();
     if (usingDefaultSession) {
@@ -112,7 +124,7 @@ void MainWindow::connectRemote() {
         mqtt = new MqttListener(0, "MQTTCute", QString::fromStdString(loadedSession.mqttHost),
                                 loadedSession.mqttPort);
     }
-    
+#endif
     
 //    QMessageBox::StandardButton reply = QMessageBox::question(this, 
 //                                                     tr("Connect securily"),

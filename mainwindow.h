@@ -3,7 +3,12 @@
 
 #include <QMainWindow>
 
+#ifdef USE_NMQTT
+#include "nmqtt_listener.h"
+#else
 #include "mqttlistener.h"
+#endif
+
 #include "topicwindow.h"
 #include "discoverywindow.h"
 #include "sessiondialog.h"
@@ -67,7 +72,11 @@ private:
     QString currentSession;
     //QString remoteServer;
     //int remotePort;
-    MqttListener* mqtt;
+#ifdef USE_NMQTT
+	NmqttListener* mqtt;
+#else
+	MqttListener* mqtt;
+#endif
     //string ca, cert, key;
     map<string, TopicWindow*> topicwindows;
     

@@ -11,14 +11,27 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = MQTTCute
 TEMPLATE = app
 
+# Enable to use NymphMQTT.
+#DEFINES += USE_NMQTT=1
+
+INCLUDEPATH += ../../endianness/src/cpp/src/
+
+LIBS += -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON
 
 SOURCES += main.cpp\
     mainwindow.cpp \
     mqttlistener.cpp \
+	nmqtt_listener.cpp \
     topicwindow.cpp \
     discoverywindow.cpp \
     sessiondialog.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+	../../NymphMQTT/src/cpp/client.cpp \
+	../../NymphMQTT/src/cpp/client_listener.cpp \
+	../../NymphMQTT/src/cpp/client_listener_manager.cpp \
+	../../NymphMQTT/src/cpp/message.cpp \
+	../../NymphMQTT/src/cpp/nymph_logger.cpp \
+	../../endianness/src/cpp/src/bytebauble.cpp
 
 win32-g++ {
     SOURCES += mosquitto/lib/cpp/mosquittopp.cpp \
@@ -43,10 +56,17 @@ win32-g++ {
 
 HEADERS  += mainwindow.h \
     mqttlistener.h \
+	nmqtt_listener.h \
     topicwindow.h \
     discoverywindow.h \
     sessiondialog.h \
-    settingsdialog.h
+    settingsdialog.h \
+	../../NymphMQTT/src/cpp/client.h \
+	../../NymphMQTT/src/cpp/client_listener.h \
+	../../NymphMQTT/src/cpp/client_listener_manager.h \
+	../../NymphMQTT/src/cpp/message.h \
+	../../NymphMQTT/src/cpp/nymph_logger.h \
+	../../endianness/src/cpp/src/bytebauble.h
 
 win32-g++ {
     HEADERS += mosquitto/lib/cpp/mosquittopp.h \

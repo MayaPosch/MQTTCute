@@ -12,3 +12,5 @@ Makefile*
 *.stash
 *.Release
 *.Debug
+build.linux/
+build/
