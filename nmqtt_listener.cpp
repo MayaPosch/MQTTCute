@@ -29,7 +29,8 @@ NmqttListener::NmqttListener(QObject *parent) {
 
 // --- DESTRUCTOR ---
 NmqttListener::~NmqttListener() {
-	//
+	client.shutdown();
+	emit finished();
 }
 
 
@@ -50,6 +51,7 @@ void NmqttListener::logHandler(int level, std::string text) {
 bool NmqttListener::init(QString clientId, QString host, int port) {
 	this->host = host;
 	this->port = port;
+	client->setClientId(clientId);
 	
 	return true;
 }
