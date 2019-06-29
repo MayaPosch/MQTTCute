@@ -74,30 +74,40 @@ bool NmqttListener::setPassword(std::string &username, std::string &password) {
 // --- PUBLISH MESSAGE ---
 void NmqttListener::publishMessage(std::string topic, std::string msg) {
 	std::string result;
-	client.publish(handle, topic, msg, result); // QoS 0.
-	
-	// TODO: use logger.
+	if (!client.publish(handle, topic, msg, result)) { // QoS 0.
+		emit failed(QString::fromStdString(result));
+	}
 }
 
 
 // --- ADD SUBSCRIPTION ---
 void NmqttListener::addSubscription(std::string topic) {
 	std::string result;
-	client.subscribe(handle, topic, result);
+	if (!client.subscribe(handle, topic, result)) {
+		emit failed(QString::fromStdString(result));
+	}
 }
 
 
 // --- REMOVE SUBSCRIPTION ---
 void NmqttListener::removeSubscription(std::string topic) {
 	std::string result;
-	client.unsubscribe(handle, topic, result);
+	if (!client.unsubscribe(handle, topic, result)) {
+		emit failed(QString::fromStdString(result));
+	}
 }
 
 
 // --- CONNECT BROKER ---
 void NmqttListener::connectBroker() {
 	std::string result;
-	client.connect(host.toStdString(), port, handle, 0, result);
+	NmqttBrokerConnection conn;
+	if (!client.connect(host.toStdString(), port, handle, 0, conn, result)) {
+		emit failed(QString::fromStdString(result));
+		return;
+	}
+	
+	emit newBrokerConnection(conn);
 }
 
 

@@ -67,6 +67,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Initialise meta types.
     qRegisterMetaType<string>("string");
     qRegisterMetaType<Session>("Session");
+#ifdef USE_NMQTT
+    qRegisterMetaType<NmqttBrokerConnection>("NmqttBrokerConnection");
+#endif
     
     // Attempt to load the previous session, if any.
     setWindowTitle("MQTTCute - Session: " + currentSession);
@@ -204,7 +207,12 @@ void MainWindow::connectRemote() {
     QThread* thread = new QThread();
     mqtt->moveToThread(thread);
     
+#ifdef USE_NMQTT
+    connect(mqtt, SIGNAL(newBrokerConnection(NmqttBrokerConnection)), 
+			this, SLOT(remoteBrokerConnectResponse(NmqttBrokerConnection)));
+#else
     connect(mqtt, SIGNAL(connected()), this, SLOT(remoteConnected()));
+#endif
     connect(mqtt, SIGNAL(failed(QString)), this, SLOT(errorHandler(QString)));
     connect(mqtt, SIGNAL(receivedMessage(string,string)), this, SLOT(receiveMessage(string,string)));
     connect(thread, SIGNAL(started()), mqtt, SLOT(connectBroker()));
@@ -231,7 +239,27 @@ void MainWindow::disconnectRemote() {
     mqtt->disconnectBroker();
 }
 
+#ifdef USE_NMQTT
+// --- REMOTE BROKER CONNECT RESPONSE ---
+// Called when we successfully connected to the MQTT broker.
+void MainWindow::remoteBrokerConnectResponse(NmqttBrokerConnection conn) {
+	if (conn.responseCode != MQTT_CODE_SUCCESS) {
+		QMessageBox::critical(this, tr("Connection error"), tr("Failed to connect to broker."));
+		return;
+	}
+		
+    QMessageBox::information(this, tr("Connected"), tr("Successfully connected to the MQTT broker."));
+    
+    connected = true;
+    ui->actionConnect->setEnabled(false);
+    ui->actionDisconnect->setEnabled(true);
+//    addTopicAction->setDisabled(false);
+//    addDiscoveryAction->setEnabled(true);
+    ui->mainToolBar->setEnabled(true);
+}
 
+#else
+	
 // --- REMOTE CONNECTED ---
 // Called when we successfully connected to the MQTT broker.
 void MainWindow::remoteConnected() {
@@ -244,6 +272,8 @@ void MainWindow::remoteConnected() {
 //    addDiscoveryAction->setEnabled(true);
     ui->mainToolBar->setEnabled(true);
 }
+#endif
+
 
 
 // --- ERROR HANDLER ---
@@ -643,7 +673,7 @@ void MainWindow::windowClosing(string topic) {
 // --- ABOUT ---
 // Display an 'about' dialogue.
 void MainWindow::about() {
-    QMessageBox::about(this, tr("About"), tr("MQTTCute MQTT client v0.2 Alpha.\n(c) 2018 Maya Posch.\nwww.mayaposch.com"));
+    QMessageBox::about(this, tr("About"), tr("MQTTCute MQTT client v0.3 Alpha.\n(c) 2019 Maya Posch.\nwww.mayaposch.com"));
 }
 
 

@@ -43,7 +43,11 @@ private slots:
     void saveSession();
     void connectRemote();
     void disconnectRemote();
+#ifdef USE_NMQTT
+	void remoteBrokerConnectResponse(NmqttBrokerConnection conn);
+#else
     void remoteConnected();
+#endif
     void addTopic();
     void addDiscovery();
     void publishMessage(string topic, string message);

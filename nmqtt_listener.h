@@ -45,6 +45,7 @@ public:
     
 signals:
     void connected();
+	void newBrokerConnection(NmqttBrokerConnection conn);
     void failed(QString err);
     void receivedMessage(std::string topic, std::string message);
     void finished();
@@ -53,6 +54,8 @@ public slots:
     void connectBroker();
     void disconnectBroker();
 };
+
+Q_DECLARE_METATYPE(NmqttBrokerConnection);
 
 
 #endif
