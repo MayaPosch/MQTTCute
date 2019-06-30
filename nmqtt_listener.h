@@ -13,12 +13,12 @@
 #define NMQTTLISTENER_H
 
 
-#include <QObject>
-
 #include <string>
 
 //#include <nymphmqtt/client.h>
 #include "../../NymphMQTT/src/cpp/client.h"
+
+#include <QObject>
 
 
 class NmqttListener : public QObject {

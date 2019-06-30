@@ -21,7 +21,7 @@ LIBS += -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON
 SOURCES += main.cpp\
     mainwindow.cpp \
     mqttlistener.cpp \
-	nmqtt_listener.cpp \
+    nmqtt_listener.cpp \
     topicwindow.cpp \
     discoverywindow.cpp \
     sessiondialog.cpp \
@@ -56,7 +56,7 @@ win32-g++ {
 
 HEADERS  += mainwindow.h \
     mqttlistener.h \
-	nmqtt_listener.h \
+    nmqtt_listener.h \
     topicwindow.h \
     discoverywindow.h \
     sessiondialog.h \

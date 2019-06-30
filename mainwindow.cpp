@@ -107,7 +107,7 @@ void MainWindow::connectRemote() {
     // TODO: make broker ID configurable.
 #ifdef USE_NMQTT
 	cout << "Initialising NymphMQTT library...\n";
-	mqtt = new NmqttListener(this);
+	mqtt = new NmqttListener(0);
 	if (usingDefaultSession) {
 		mqtt->init("MQTTCute", QString::fromStdString(defaultSession.mqttHost),
                                 defaultSession.mqttPort);
@@ -580,8 +580,8 @@ void MainWindow::addDiscovery() {
     discoverywindows.insert(std::pair<string, DiscoveryWindow*>(topic.toStdString(), dw));
     
     // Add connections.
-    connect(dw, SIGNAL(addSubscription(string)), this, SLOT(addSubscription(string)));
-    connect(dw, SIGNAL(removeSubscription(string)), this, SLOT(removeSubscription(string)));
+    connect(dw, SIGNAL(addSubscription(string)), mqtt, SLOT(addSubscription(string)));
+    connect(dw, SIGNAL(removeSubscription(string)), mqtt, SLOT(removeSubscription(string)));
     connect(dw, SIGNAL(windowClosing(string)), this, SLOT(windowClosing(string)));
             
     QMdiSubWindow* sw = ui->mdiArea->addSubWindow(dw);

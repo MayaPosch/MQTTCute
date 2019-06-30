@@ -1,5 +1,5 @@
 /*
-	nmqtt_listener.cpp - Implementation file for the NmqttListener class.
+	nmqtt_listener.cpp - Implementation file for the MqttListener class.
 	
 	Revision 0
 	
@@ -20,7 +20,7 @@
 
 
 // --- CONSTRUCTOR ---
-NmqttListener::NmqttListener(QObject *parent) {
+NmqttListener::NmqttListener(QObject *parent) : QObject(parent)  {
 	using namespace std::placeholders;
 	client.init(std::bind(&NmqttListener::logHandler, this, _1, _2), NYMPH_LOG_LEVEL_TRACE, 3000);
 	client.setMessageHandler(std::bind(&NmqttListener::messageHandler, this, _1, _2, _3));
@@ -51,7 +51,7 @@ void NmqttListener::logHandler(int level, std::string text) {
 bool NmqttListener::init(QString clientId, QString host, int port) {
 	this->host = host;
 	this->port = port;
-	client->setClientId(clientId);
+	client.setClientId(clientId.toStdString());
 	
 	return true;
 }
