@@ -37,6 +37,8 @@ public:
     ~NmqttListener();
 	
 	bool init(QString clientId = "CC-UI", QString host = "localhost", int port = 1883);
+    
+public slots:
 	bool setTLS(std::string &ca, std::string &cert, std::string &key);
 	bool setPassword(std::string &username, std::string &password);
 	void publishMessage(std::string topic, std::string msg);

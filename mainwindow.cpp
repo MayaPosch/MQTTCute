@@ -17,6 +17,9 @@
 #include <QAction>
 
 
+using namespace std;
+
+
 // --- CONSTRUCTOR ---
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -66,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     
     // Initialise meta types.
     qRegisterMetaType<string>("string");
+    qRegisterMetaType<std::string>("std::string");
     qRegisterMetaType<Session>("Session");
 #ifdef USE_NMQTT
     qRegisterMetaType<NmqttBrokerConnection>("NmqttBrokerConnection");
@@ -214,7 +218,7 @@ void MainWindow::connectRemote() {
     connect(mqtt, SIGNAL(connected()), this, SLOT(remoteConnected()));
 #endif
     connect(mqtt, SIGNAL(failed(QString)), this, SLOT(errorHandler(QString)));
-    connect(mqtt, SIGNAL(receivedMessage(string,string)), this, SLOT(receiveMessage(string,string)));
+    connect(mqtt, SIGNAL(receivedMessage(std::string,std::string)), this, SLOT(receiveMessage(std::string,std::string)));
     connect(thread, SIGNAL(started()), mqtt, SLOT(connectBroker()));
     connect(mqtt, SIGNAL(finished()), thread, SLOT(quit()));
     connect(thread, SIGNAL(finished()), mqtt, SLOT(deleteLater()));
@@ -527,7 +531,7 @@ void MainWindow::addTopic() {
     if (topic.isEmpty()) { return; }
     
     // Check that we don't already have this topic.
-    map<string, TopicWindow*>::const_iterator it;
+    map<std::string, TopicWindow*>::const_iterator it;
 	it = topicwindows.find(topic.toStdString());
 	if (it != topicwindows.end()) {
 		QMessageBox::warning(this, tr("Existing topic"), tr("The selected topic already exists."));
@@ -537,13 +541,14 @@ void MainWindow::addTopic() {
     // Open a new window in the MDI for this topic.    
     TopicWindow* tw = new TopicWindow(this);
     tw->setTopic(topic);
-    topicwindows.insert(std::pair<string, TopicWindow*>(topic.toStdString(), tw));
+    topicwindows.insert(std::pair<std::string, TopicWindow*>(topic.toStdString(), tw));
     
     // Add connections.
-    connect(tw, SIGNAL(newMessage(string,string)), this, SLOT(publishMessage(string,string)));
-    connect(tw, SIGNAL(addSubscription(string)), this, SLOT(addSubscription(string)));
-    connect(tw, SIGNAL(removeSubscription(string)), this, SLOT(removeSubscription(string)));
-    connect(tw, SIGNAL(windowClosing(string)), this, SLOT(windowClosing(string)));
+    connect(tw, SIGNAL(newMessage(std::string,std::string)), 
+			mqtt, SLOT(publishMessage(std::string,std::string)));
+    connect(tw, SIGNAL(addSubscription(std::string)), mqtt, SLOT(addSubscription(std::string)));
+    connect(tw, SIGNAL(removeSubscription(std::string)), mqtt, SLOT(removeSubscription(std::string)));
+    connect(tw, SIGNAL(windowClosing(std::string)), this, SLOT(windowClosing(std::string)));
             
     QMdiSubWindow* sw = ui->mdiArea->addSubWindow(tw);
     sw->show();
@@ -577,12 +582,12 @@ void MainWindow::addDiscovery() {
     // Open a new window in the MDI for this topic.    
     DiscoveryWindow* dw = new DiscoveryWindow(this);
     dw->setTopic(topic);
-    discoverywindows.insert(std::pair<string, DiscoveryWindow*>(topic.toStdString(), dw));
+    discoverywindows.insert(std::pair<std::string, DiscoveryWindow*>(topic.toStdString(), dw));
     
     // Add connections.
-    connect(dw, SIGNAL(addSubscription(string)), mqtt, SLOT(addSubscription(string)));
-    connect(dw, SIGNAL(removeSubscription(string)), mqtt, SLOT(removeSubscription(string)));
-    connect(dw, SIGNAL(windowClosing(string)), this, SLOT(windowClosing(string)));
+    connect(dw, SIGNAL(addSubscription(std::string)), mqtt, SLOT(addSubscription(std::string)));
+    connect(dw, SIGNAL(removeSubscription(std::string)), mqtt, SLOT(removeSubscription(std::string)));
+    connect(dw, SIGNAL(windowClosing(std::string)), this, SLOT(windowClosing(std::string)));
             
     QMdiSubWindow* sw = ui->mdiArea->addSubWindow(dw);
     sw->show();
@@ -590,7 +595,7 @@ void MainWindow::addDiscovery() {
 
 
 // --- PUBLISH MESSAGE ---
-void MainWindow::publishMessage(string topic, string message) {
+void MainWindow::publishMessage(std::string topic, std::string message) {
     if (!mqtt) { return; }
     
     mqtt->publishMessage(topic, message);
@@ -598,7 +603,7 @@ void MainWindow::publishMessage(string topic, string message) {
 
 
 // --- RECEIVE MESSAGE ---
-void MainWindow::receiveMessage(string topic, string message) {
+void MainWindow::receiveMessage(std::string topic, std::string message) {
     // Check that we have a window with the appropriate topic.
     map<string, TopicWindow*>::const_iterator it;
     it = topicwindows.find(topic);
@@ -640,7 +645,7 @@ void MainWindow::receiveMessage(string topic, string message) {
 
 
 // --- ADD SUBSCRIPTION ---
-void MainWindow::addSubscription(string topic) {
+void MainWindow::addSubscription(std::string topic) {
     if (!mqtt) { return; }
     
     mqtt->addSubscription(topic);
@@ -648,7 +653,7 @@ void MainWindow::addSubscription(string topic) {
 
 
 // --- REMOVE SUBSCRIPTION ---
-void MainWindow::removeSubscription(string topic) {
+void MainWindow::removeSubscription(std::string topic) {
     if (!mqtt) { return; }
     
     mqtt->removeSubscription(topic);
@@ -656,10 +661,10 @@ void MainWindow::removeSubscription(string topic) {
 
 
 // --- WINDOW CLOSING ---
-void MainWindow::windowClosing(string topic) {
+void MainWindow::windowClosing(std::string topic) {
     // As the window with the specified topic is closing, we should clean up references to it.
     cout << "Closing window with topic: " << topic << endl;
-    map<string, TopicWindow*>::iterator it;
+    map<std::string, TopicWindow*>::iterator it;
     it = topicwindows.find(topic);
     if (it == topicwindows.end()) {
         cerr << "Received window closing event for unknown topic: " << topic << endl;

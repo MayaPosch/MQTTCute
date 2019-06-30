@@ -23,8 +23,6 @@
 
 #include <string>
 
-using namespace std;
-
 #include <QObject>
 
 
@@ -39,20 +37,21 @@ public:
                           QString host = "localhost", int port = 1883);
     ~MqttListener();
     
-    bool setTLS(string &ca, string &cert, string &key);
-	bool setPassword(string &username, string &password);
+public slots:
+    bool setTLS(std::string &ca, std::string &cert, std::string &key);
+	bool setPassword(std::string &username, std::string &password);
     void on_connect(int rc);
     void on_message(const struct mosquitto_message* message);
     void on_subscribe(int mid, int qos_count, const int* granted_qos);
     void on_log(int level, const char* str);
-    void publishMessage(string topic, string msg);
-    void addSubscription(string topic);
-    void removeSubscription(string topic);
+    void publishMessage(std::string topic, std::string msg);
+    void addSubscription(std::string topic);
+    void removeSubscription(std::string topic);
     
 signals:
     void connected();
     void failed(QString err);
-    void receivedMessage(string topic, string message);
+    void receivedMessage(std::string topic, std::string message);
     void finished();
     
 public slots:

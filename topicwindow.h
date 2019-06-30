@@ -6,8 +6,6 @@
 
 #include <string>
 
-using namespace std;
-
 
 namespace Ui {
     class TopicWindow;
@@ -24,20 +22,20 @@ public:
     
 private:
     Ui::TopicWindow *ui;
-    string topic;
+    std::string topic;
     
 private slots:
     void publishTopic();
     void subscriptionStatus(bool status);
     
 public slots:
-    void receiveMessage(string message);
+    void receiveMessage(std::string message);
     
 signals:
-    void newMessage(string topic, string message);
-    void addSubscription(string topic);
-    void removeSubscription(string topic);
-    void windowClosing(string topic);
+    void newMessage(std::string topic, std::string message);
+    void addSubscription(std::string topic);
+    void removeSubscription(std::string topic);
+    void windowClosing(std::string topic);
     
 protected:
     void closeEvent(QCloseEvent *event);

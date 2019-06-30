@@ -16,11 +16,10 @@
 #include <string>
 #include <map>
 
-using namespace std;
-
 
 // Meta type registration for signal/slots.
 Q_DECLARE_METATYPE(string)
+//Q_DECLARE_METATYPE(std::string)
 Q_DECLARE_METATYPE(Session)
 
 
@@ -50,11 +49,11 @@ private slots:
 #endif
     void addTopic();
     void addDiscovery();
-    void publishMessage(string topic, string message);
-    void receiveMessage(string topic, string message);
-    void addSubscription(string topic);
-    void removeSubscription(string topic);
-    void windowClosing(string topic);
+    void publishMessage(std::string topic, std::string message);
+    void receiveMessage(std::string topic, std::string message);
+    void addSubscription(std::string topic);
+    void removeSubscription(std::string topic);
+    void windowClosing(std::string topic);
     void errorHandler(QString err);
     void about();
     void quit();
@@ -82,14 +81,14 @@ private:
     MqttListener* mqtt;
 #endif
     //string ca, cert, key;
-    map<string, TopicWindow*> topicwindows;
+    std::map<std::string, TopicWindow*> topicwindows;
     
     //bool loadSession(QString path, Session &s);
     //bool saveSession(QString path, Session &s);
     
 protected:
     void closeEvent(QCloseEvent *event);
-	map<string, DiscoveryWindow*> discoverywindows;
+	std::map<std::string, DiscoveryWindow*> discoverywindows;
 };
 
 #endif // MAINWINDOW_H

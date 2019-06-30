@@ -49,8 +49,8 @@ void DiscoveryWindow::clearText() {
 
 // --- RECEIVE MESSAGE ---
 // Called when a new message is available.
-void DiscoveryWindow::receiveMessage(string topic, string /*message*/) {
-	set<string>::const_iterator it;
+void DiscoveryWindow::receiveMessage(std::string topic, std::string /*message*/) {
+	std::set<std::string>::const_iterator it;
 	it = topics.find(topic);
 	if (it == topics.end()) {
 		// Topic not found. Insert and add to GUI.

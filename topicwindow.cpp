@@ -3,8 +3,6 @@
 
 #include <iostream>
 
-using namespace std;
-
 #include <QScrollBar>
 
 
@@ -42,13 +40,13 @@ TopicWindow::~TopicWindow() {
 
 // --- PUBLISH TOPIC ---
 void TopicWindow::publishTopic() {
-    string message = ui->publishLineEdit->text().toStdString();
+    std::string message = ui->publishLineEdit->text().toStdString();
     
     // Parse any binary meta characters in the message string.
     // These start with \x and are followed by two digits (0-9, a-f, A-F).
     int idx = 0;
     uint outpos = 0;
-    string out;
+    std::string out;
     while ((idx = message.find("\\x", idx)) != std::string::npos) {
         // Read the next two characters into a string for conversion.
         // Copy the part that will remain unchanged into the output string.
@@ -64,7 +62,7 @@ void TopicWindow::publishTopic() {
             out += message.substr(idx, 4);
         }
         else {
-            out += string((const char*) &tint, 1);
+            out += std::string((const char*) &tint, 1);
         }
         
         // Update indices.
@@ -92,12 +90,12 @@ void TopicWindow::subscriptionStatus(bool status) {
 
 // --- RECEIVE MESSAGE ---
 // Called when a new message is available.
-void TopicWindow::receiveMessage(string message) {
+void TopicWindow::receiveMessage(std::string message) {
     // Format to hex-editor style text, with 8 hex bytes & 8 ASCII characters per line.
     QString text;
     uint i = 0;
     while (i < message.length()) {
-        string temp;
+        std::string temp;
         if ((i + 8) < message.length()) { temp = message.substr(i, 8); }
         else { temp = message.substr(i); }
         

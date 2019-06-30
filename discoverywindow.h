@@ -7,8 +7,6 @@
 #include <string>
 #include <set>
 
-using namespace std;
-
 
 namespace Ui {
     class DiscoveryWindow;
@@ -25,20 +23,20 @@ public:
 
 private:
     Ui::DiscoveryWindow *ui;
-    string topic;
-	set<string> topics;
+    std::string topic;
+	std::set<std::string> topics;
     
 private slots:
     void subscriptionStatus(bool status);
 	void clearText();
     
 public slots:
-    void receiveMessage(string topic, string);
+    void receiveMessage(std::string topic, std::string message);
     
 signals:
-    void addSubscription(string topic);
-    void removeSubscription(string topic);
-    void windowClosing(string topic);
+    void addSubscription(std::string topic);
+    void removeSubscription(std::string topic);
+    void windowClosing(std::string topic);
     
 protected:
     void closeEvent(QCloseEvent *event);
