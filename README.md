@@ -2,7 +2,7 @@
 
 **Author:** Maya Posch
 
-**Date:** 2018/01/10
+**Revised:** 2019/09/22
 
 ## Overview ##
 
@@ -15,6 +15,28 @@ MQTTCute is an MQTT desktop client written in C++/Qt. Its main focus is on being
 For 64-bit Windows a binary installer is provided. See the [releases page](https://github.com/MayaPosch/MQTTCute/releases) for this project for a download link. This version should work on Windows 7 and up.
 
 ## Building ##
+
+Starting recently, the new [NymphMQTT](https://github.com/MayaPosch/NymphMQTT) library has been integrated into MQTTCute, replacing the libmosquitto dependency. To use libmosquitto instead, edit the project file and follow the old build instructions.
+
+The full list of dependencies is:
+
+* Qt 5.x.
+* POCO.
+* NymphMQTT.
+
+One can build the project using the Qt Creator IDE, or from the command line when in the project root:
+
+	$ mkdir build
+	$ cd build
+	$ qmake ..
+	$ make
+
+This will build the debug version in a `debug` sub-folder. To build the release version into the `release` folder, replace the `make` command with:
+	
+	$ make release
+
+
+## Building (old) ##
 
 This application should compile and run on any platform which is supported by the Qt 5.x framework and has the Mosquitto client libraries (libmosquitto, libmosquittopp) available for them.
 

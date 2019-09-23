@@ -76,29 +76,12 @@ SectionEnd */
 Section "MQTTCute"
 	SetOutPath $INSTDIR
 
-	;File "mosquitto.dll"
-	;File "mosquittopp.dll"
 	File "MQTTCute.exe"
-	;File "pthreadVC2.dll"
-	File "Qt5Core.dll"
-	File "Qt5Gui.dll"
-	File "Qt5Widgets.dll"
-	File "libbz2-1.dll"
-	File "libfreetype-6.dll"
-	File "libgcc_s_seh-1.dll"
-	File "libglib-2.0-0.dll"
-	File "libgraphite2.dll"
-	File "libharfbuzz-0.dll"
-	File "libiconv-2.dll"
-	File "libicudt62.dll"
-	File "libicuin62.dll"
-	File "libicuuc62.dll"
-	File "libintl-8.dll"
-	File "libpcre-1.dll"
-	File "libpcre2-16-0.dll"
-	File "libpng16-16.dll"
-	File "libstdc++-6.dll"
-	File "zlib1.dll"
+	File /r *.dll
+	;File "iconengines/*.dll"
+	;File "platforms/*.dll"
+	;File "styles/*.dll"
+	;File "translations/*.qm"
 	
 
 	;Store installation folder
@@ -128,33 +111,17 @@ SectionEnd
 ;Uninstaller Section
 
 Section "un.Uninstall Section"
-	;File "mosquitto.dll"
-	;File "mosquittopp.dll"
-	File "MQTTCute.exe"
-	;File "pthreadVC2.dll"
-	File "Qt5Core.dll"
-	File "Qt5Gui.dll"
-	File "Qt5Widgets.dll"
-	File "libbz2-1.dll"
-	File "libfreetype-6.dll"
-	File "libgcc_s_seh-1.dll"
-	File "libglib-2.0-0.dll"
-	File "libgraphite2.dll"
-	File "libharfbuzz-0.dll"
-	File "libiconv-2.dll"
-	File "libicudt62.dll"
-	File "libicuin62.dll"
-	File "libicuuc62.dll"
-	File "libintl-8.dll"
-	File "libpcre-1.dll"
-	File "libpcre2-16-0.dll"
-	File "libpng16-16.dll"
-	File "libstdc++-6.dll"
-	File "zlib1.dll"
+	Delete "MQTTCute.exe"
+	Delete $INSTDIR\*.dll
+	Delete $INSTDIR\iconengines\*.dll
+	Delete $INSTDIR\imageformats\*.dll
+	Delete $INSTDIR\platforms\*.dll
+	Delete $INSTDIR\styles\*.dll
+	Delete $INSTDIR\translations\*.qm
 
 	Delete "$INSTDIR\uninstall.exe"
 
-	RMDir "$INSTDIR"
+	RMDir /r "$INSTDIR"
 
 	DeleteRegKey /ifempty HKLM "Software\MQTTCute"
   

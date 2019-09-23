@@ -59,7 +59,7 @@ bool NmqttListener::init(QString clientId, QString host, int port) {
 
 // --- SET TLS ---
 bool NmqttListener::setTLS(std::string &ca, std::string &cert, std::string &key) {
-	//
+	client.setTLS(ca, cert, key);
 	
 	return true;
 }
@@ -67,7 +67,7 @@ bool NmqttListener::setTLS(std::string &ca, std::string &cert, std::string &key)
 
 // --- SET PASSWORD ---
 bool NmqttListener::setPassword(std::string &username, std::string &password) {
-	//
+	client.setCredentials(username, password);
 	
 	return true;
 }

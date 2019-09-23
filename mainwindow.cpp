@@ -164,6 +164,7 @@ void MainWindow::connectRemote() {
 //        cert = certFile.toStdString();
 //        key = keyFile.toStdString();
     if (usingDefaultSession && defaultSession.loginType == LOGIN_TYPE_CERTIFICATE) {
+		std::cout << "Setting TLS for default session..." << std::endl;
         if (!mqtt->setTLS(defaultSession.caFile, defaultSession.certFile, defaultSession.keyFile)) {
             cerr << "SetTLS failed.\n";
             QMessageBox::critical(this, tr("Setting TLS failed"), 
@@ -174,6 +175,7 @@ void MainWindow::connectRemote() {
         }
     }
     else if (loadedSession.loginType == LOGIN_TYPE_CERTIFICATE) {
+		std::cout << "Setting TLS for session..." << std::endl;
         if (!mqtt->setTLS(loadedSession.caFile, loadedSession.certFile, loadedSession.keyFile)) {
             cerr << "SetTLS failed.\n";
             QMessageBox::critical(this, tr("Setting TLS failed"), 
@@ -185,6 +187,7 @@ void MainWindow::connectRemote() {
     }
 	
 	if (usingDefaultSession && defaultSession.loginType == LOGIN_TYPE_PASSWORD) {
+		std::cout << "Setting username/password for default session..." << std::endl;
 		if (!mqtt->setPassword(defaultSession.username, defaultSession.password)) {
 			cerr << "Setting username/password failed.\n";
             QMessageBox::critical(this, tr("Setting username/password failed"), 
@@ -196,6 +199,7 @@ void MainWindow::connectRemote() {
 		
 	}
 	else if (loadedSession.loginType == LOGIN_TYPE_PASSWORD) {
+		std::cout << "Setting username/password for session..." << std::endl;
 		if (!mqtt->setPassword(loadedSession.username, loadedSession.password)) {
 			cerr << "Setting username/password failed.\n";
             QMessageBox::critical(this, tr("Setting username/password failed"), 
@@ -231,6 +235,14 @@ void MainWindow::connectRemote() {
 // Disconnect from the MQTT broker, if connected.
 void MainWindow::disconnectRemote() {
     if (!connected) { return; }
+	
+	mqtt->disconnectBroker();
+	connected = false;
+	
+	// FIXME: discarding the MQTT runtime here. Should allow for reuse and multiple
+	// broker connections instead.
+	delete mqtt;
+	mqtt = 0;
     
     QMessageBox::information(this, tr("Disconnected."), tr("Disconnected from remote."));
     
@@ -239,8 +251,6 @@ void MainWindow::disconnectRemote() {
     //addTopicAction->setDisabled(true);
     //addDiscoveryAction->setEnabled(false);
     ui->mainToolBar->setDisabled(true);
-    
-    mqtt->disconnectBroker();
 }
 
 #ifdef USE_NMQTT

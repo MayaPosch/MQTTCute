@@ -12,11 +12,11 @@ TARGET = MQTTCute
 TEMPLATE = app
 
 # Enable to use NymphMQTT.
-#DEFINES += USE_NMQTT=1
+DEFINES += USE_NMQTT=1
 
 INCLUDEPATH += ../../endianness/src/cpp/src/
 
-LIBS += -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON
+LIBS += -lPocoNet -lPocoNetSSL -lPocoUtil -lPocoFoundation -lPocoJSON
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -26,12 +26,17 @@ SOURCES += main.cpp\
     discoverywindow.cpp \
     sessiondialog.cpp \
     settingsdialog.cpp \
+	../../NymphMQTT/src/cpp/chronotrigger.cpp \
 	../../NymphMQTT/src/cpp/client.cpp \
 	../../NymphMQTT/src/cpp/client_listener.cpp \
 	../../NymphMQTT/src/cpp/client_listener_manager.cpp \
+	../../NymphMQTT/src/cpp/connections.cpp \
+	../../NymphMQTT/src/cpp/dispatcher.cpp \
 	../../NymphMQTT/src/cpp/message.cpp \
 	../../NymphMQTT/src/cpp/nymph_logger.cpp \
-	../../endianness/src/cpp/src/bytebauble.cpp
+	../../NymphMQTT/src/cpp/request.cpp \
+	../../NymphMQTT/src/cpp/worker.cpp \
+	../../ByteBauble/src/cpp/src/bytebauble.cpp
 
 win32-g++ {
     SOURCES += mosquitto/lib/cpp/mosquittopp.cpp \
