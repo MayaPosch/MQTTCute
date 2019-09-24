@@ -11,12 +11,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = MQTTCute
 TEMPLATE = app
 
+CONFIG += console
+
 # Enable to use NymphMQTT.
 DEFINES += USE_NMQTT=1
 
-INCLUDEPATH += ../../endianness/src/cpp/src/
-
-LIBS += -lPocoNet -lPocoNetSSL -lPocoUtil -lPocoFoundation -lPocoJSON
+LIBS += -lnymphmqtt -lbytebauble -lPocoNet -lPocoNetSSL -lPocoUtil -lPocoFoundation -lPocoJSON
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -25,18 +25,7 @@ SOURCES += main.cpp\
     topicwindow.cpp \
     discoverywindow.cpp \
     sessiondialog.cpp \
-    settingsdialog.cpp \
-	../../NymphMQTT/src/cpp/chronotrigger.cpp \
-	../../NymphMQTT/src/cpp/client.cpp \
-	../../NymphMQTT/src/cpp/client_listener.cpp \
-	../../NymphMQTT/src/cpp/client_listener_manager.cpp \
-	../../NymphMQTT/src/cpp/connections.cpp \
-	../../NymphMQTT/src/cpp/dispatcher.cpp \
-	../../NymphMQTT/src/cpp/message.cpp \
-	../../NymphMQTT/src/cpp/nymph_logger.cpp \
-	../../NymphMQTT/src/cpp/request.cpp \
-	../../NymphMQTT/src/cpp/worker.cpp \
-	../../ByteBauble/src/cpp/src/bytebauble.cpp
+    settingsdialog.cpp
 
 win32-g++ {
     SOURCES += mosquitto/lib/cpp/mosquittopp.cpp \
@@ -65,13 +54,7 @@ HEADERS  += mainwindow.h \
     topicwindow.h \
     discoverywindow.h \
     sessiondialog.h \
-    settingsdialog.h \
-	../../NymphMQTT/src/cpp/client.h \
-	../../NymphMQTT/src/cpp/client_listener.h \
-	../../NymphMQTT/src/cpp/client_listener_manager.h \
-	../../NymphMQTT/src/cpp/message.h \
-	../../NymphMQTT/src/cpp/nymph_logger.h \
-	../../endianness/src/cpp/src/bytebauble.h
+    settingsdialog.h
 
 win32-g++ {
     HEADERS += mosquitto/lib/cpp/mosquittopp.h \
