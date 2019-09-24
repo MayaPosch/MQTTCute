@@ -74,9 +74,12 @@ bool NmqttListener::setPassword(std::string &username, std::string &password) {
 
 
 // --- PUBLISH MESSAGE ---
-void NmqttListener::publishMessage(std::string topic, std::string msg) {
+void NmqttListener::publishMessage(std::string topic, std::string msg, uint8_t qos, bool retain) {
+	MqttQoS qosLvl = MQTT_QOS_AT_MOST_ONCE;
+	if (qos == 1) { qosLvl = MQTT_QOS_AT_LEAST_ONCE; }
+	if (qos == 2) { qosLvl = MQTT_QOS_EXACTLY_ONCE; }
 	std::string result;
-	if (!client.publish(handle, topic, msg, result)) { // QoS 0.
+	if (!client.publish(handle, topic, msg, result, qosLvl, retain)) {
 		emit failed(QString::fromStdString(result));
 	}
 }

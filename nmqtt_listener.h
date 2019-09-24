@@ -15,8 +15,7 @@
 
 #include <string>
 
-//#include <nymphmqtt/client.h>
-#include "../../NymphMQTT/src/cpp/client.h"
+#include <nymphmqtt/client.h>
 
 #include <QObject>
 
@@ -41,7 +40,7 @@ public:
 public slots:
 	bool setTLS(std::string &ca, std::string &cert, std::string &key);
 	bool setPassword(std::string &username, std::string &password);
-	void publishMessage(std::string topic, std::string msg);
+	void publishMessage(std::string topic, std::string msg, uint8_t qos = 0, bool retain = false);
     void addSubscription(std::string topic);
     void removeSubscription(std::string topic);
     

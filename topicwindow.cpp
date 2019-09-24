@@ -17,10 +17,10 @@ TopicWindow::TopicWindow(QWidget *parent) : QWidget(parent), ui(new Ui::TopicWin
     
     // Defaults
     ui->subscribeCheckBox->setChecked(false);
-    ui->subscribeTextEdit->document()->setMaximumBlockCount(100); // Limit paragraphs.
+    ui->subscribePlainTextEdit->document()->setMaximumBlockCount(100); // Limit paragraphs.
     QFont font("Monospace");
     font.setStyleHint(QFont::TypeWriter);
-    ui->subscribeTextEdit->setFont(font);
+    ui->subscribePlainTextEdit->setFont(font);
     this->setFixedWidth(320);
 }
 
@@ -76,8 +76,11 @@ void TopicWindow::publishTopic() {
     
     if (out.length() < 1) { out = message; }
     else if (message.length() > outpos) { out += message.substr(outpos); }
+	
+	uint8_t qos = ui->qosSpinBox->value();
+	bool retain = ui->retainCheckbox->isChecked();
     
-    emit newMessage(topic, out);
+    emit newMessage(topic, out, qos, retain);
 }
 
 
@@ -91,6 +94,9 @@ void TopicWindow::subscriptionStatus(bool status) {
 // --- RECEIVE MESSAGE ---
 // Called when a new message is available.
 void TopicWindow::receiveMessage(std::string message) {
+	// Debug
+	std::cout << "TopicWindow: Received new message: " << message << std::endl;
+	
     // Format to hex-editor style text, with 8 hex bytes & 8 ASCII characters per line.
     QString text;
     uint i = 0;
@@ -117,17 +123,20 @@ void TopicWindow::receiveMessage(std::string message) {
         text += "\u2007\u2007\u2007\u2007";
         text += QString::fromStdString(temp);
         text += "\n";
+		
+		// Debug
+		std::cout << "Adding line: " << line.toStdString() << std::endl;
         
         i += 8;
     }
     
     // Scroll to bottom after inserting text if we are already at the bottom, else leave the scrollbar where it is.
-    if (ui->subscribeTextEdit->verticalScrollBar()->value() == ui->subscribeTextEdit->verticalScrollBar()->maximum()) {
-        ui->subscribeTextEdit->insertPlainText(text);
-        ui->subscribeTextEdit->verticalScrollBar()->triggerAction(QAbstractSlider::SliderToMaximum);
+    if (ui->subscribePlainTextEdit->verticalScrollBar()->value() == ui->subscribePlainTextEdit->verticalScrollBar()->maximum()) {
+        ui->subscribePlainTextEdit->insertPlainText(text);
+        ui->subscribePlainTextEdit->verticalScrollBar()->triggerAction(QAbstractSlider::SliderToMaximum);
     }
     else {
-        ui->subscribeTextEdit->insertPlainText(text);
+        ui->subscribePlainTextEdit->insertPlainText(text);
     }
 }
 

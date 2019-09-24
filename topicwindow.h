@@ -32,7 +32,7 @@ public slots:
     void receiveMessage(std::string message);
     
 signals:
-    void newMessage(std::string topic, std::string message);
+    void newMessage(std::string topic, std::string message, uint8_t qos, bool retain);
     void addSubscription(std::string topic);
     void removeSubscription(std::string topic);
     void windowClosing(std::string topic);

@@ -15,11 +15,12 @@
 
 #include <string>
 #include <map>
+#include <mutex>
 
 
 // Meta type registration for signal/slots.
 Q_DECLARE_METATYPE(string)
-//Q_DECLARE_METATYPE(std::string)
+Q_DECLARE_METATYPE(uint8_t)
 Q_DECLARE_METATYPE(Session)
 
 
@@ -49,7 +50,7 @@ private slots:
 #endif
     void addTopic();
     void addDiscovery();
-    void publishMessage(std::string topic, std::string message);
+    void publishMessage(std::string topic, std::string message, uint8_t qos = 0, bool retain = false);
     void receiveMessage(std::string topic, std::string message);
     void addSubscription(std::string topic);
     void removeSubscription(std::string topic);
@@ -82,6 +83,7 @@ private:
 #endif
     //string ca, cert, key;
     std::map<std::string, TopicWindow*> topicwindows;
+	std::mutex topicMutex;
     
     //bool loadSession(QString path, Session &s);
     //bool saveSession(QString path, Session &s);
@@ -89,6 +91,7 @@ private:
 protected:
     void closeEvent(QCloseEvent *event);
 	std::map<std::string, DiscoveryWindow*> discoverywindows;
+	std::mutex discoveryMutex;
 };
 
 #endif // MAINWINDOW_H

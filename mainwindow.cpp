@@ -70,6 +70,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Initialise meta types.
     qRegisterMetaType<string>("string");
     qRegisterMetaType<std::string>("std::string");
+    qRegisterMetaType<uint8_t>("uint8_t");
     qRegisterMetaType<Session>("Session");
 #ifdef USE_NMQTT
     qRegisterMetaType<NmqttBrokerConnection>("NmqttBrokerConnection");
@@ -541,10 +542,12 @@ void MainWindow::addTopic() {
     if (topic.isEmpty()) { return; }
     
     // Check that we don't already have this topic.
+	topicMutex.lock();
     map<std::string, TopicWindow*>::const_iterator it;
 	it = topicwindows.find(topic.toStdString());
 	if (it != topicwindows.end()) {
 		QMessageBox::warning(this, tr("Existing topic"), tr("The selected topic already exists."));
+		topicMutex.unlock();
 		return;
 	}
     
@@ -552,10 +555,11 @@ void MainWindow::addTopic() {
     TopicWindow* tw = new TopicWindow(this);
     tw->setTopic(topic);
     topicwindows.insert(std::pair<std::string, TopicWindow*>(topic.toStdString(), tw));
+	topicMutex.unlock();
     
     // Add connections.
-    connect(tw, SIGNAL(newMessage(std::string,std::string)), 
-			mqtt, SLOT(publishMessage(std::string,std::string)));
+    connect(tw, SIGNAL(newMessage(std::string,std::string,uint8_t,bool)), 
+			mqtt, SLOT(publishMessage(std::string,std::string,uint8_t,bool)));
     connect(tw, SIGNAL(addSubscription(std::string)), mqtt, SLOT(addSubscription(std::string)));
     connect(tw, SIGNAL(removeSubscription(std::string)), mqtt, SLOT(removeSubscription(std::string)));
     connect(tw, SIGNAL(windowClosing(std::string)), this, SLOT(windowClosing(std::string)));
@@ -583,9 +587,11 @@ void MainWindow::addDiscovery() {
     
     // Check that we don't already have this topic.
     map<string, DiscoveryWindow*>::const_iterator it;
+	discoveryMutex.lock();
 	it = discoverywindows.find(topic.toStdString());
 	if (it != discoverywindows.end()) {
 		QMessageBox::warning(this, tr("Existing topic"), tr("The selected topic already exists."));
+		discoveryMutex.unlock();
 		return;
 	}
     
@@ -593,6 +599,7 @@ void MainWindow::addDiscovery() {
     DiscoveryWindow* dw = new DiscoveryWindow(this);
     dw->setTopic(topic);
     discoverywindows.insert(std::pair<std::string, DiscoveryWindow*>(topic.toStdString(), dw));
+	discoveryMutex.unlock();
     
     // Add connections.
     connect(dw, SIGNAL(addSubscription(std::string)), mqtt, SLOT(addSubscription(std::string)));
@@ -605,10 +612,10 @@ void MainWindow::addDiscovery() {
 
 
 // --- PUBLISH MESSAGE ---
-void MainWindow::publishMessage(std::string topic, std::string message) {
+void MainWindow::publishMessage(std::string topic, std::string message, uint8_t qos, bool retain) {
     if (!mqtt) { return; }
     
-    mqtt->publishMessage(topic, message);
+    mqtt->publishMessage(topic, message, qos, retain);
 }
 
 
@@ -616,6 +623,7 @@ void MainWindow::publishMessage(std::string topic, std::string message) {
 void MainWindow::receiveMessage(std::string topic, std::string message) {
     // Check that we have a window with the appropriate topic.
     map<string, TopicWindow*>::const_iterator it;
+	topicMutex.lock();
     it = topicwindows.find(topic);
     bool found = false;
 	if (it != topicwindows.end()) {
@@ -630,18 +638,25 @@ void MainWindow::receiveMessage(std::string topic, std::string message) {
 				// Matching topic found. Send message.
 				it->second->receiveMessage(message);
 				found = true;
+				break;
 			}
 		}
 	}
 	
+	topicMutex.unlock();
+	
+	discoveryMutex.lock();
 	map<string, DiscoveryWindow*>::const_iterator dit;
 	for (dit = discoverywindows.begin(); dit != discoverywindows.end(); ++dit) {
 		if (dit->first.compare(0, dit->first.length() - 1, topic, 0, dit->first.length() - 1) == 0) {
 			// Matching topic found. Send message.
 			dit->second->receiveMessage(topic, message);
 			found = true;
+			break;
 		}
 	}
+	
+	discoveryMutex.unlock();
 	
 	// If no matching topics were found, try to unsubscribe.
 	// FIXME: If the subscription was from an old # topic, figure out a way to unsubscribe anyway.
@@ -675,13 +690,16 @@ void MainWindow::windowClosing(std::string topic) {
     // As the window with the specified topic is closing, we should clean up references to it.
     cout << "Closing window with topic: " << topic << endl;
     map<std::string, TopicWindow*>::iterator it;
+	topicMutex.lock();
     it = topicwindows.find(topic);
     if (it == topicwindows.end()) {
         cerr << "Received window closing event for unknown topic: " << topic << endl;
+		topicMutex.unlock();
         return;
     }
     
     topicwindows.erase(it);
+	topicMutex.unlock();
 }
 
 

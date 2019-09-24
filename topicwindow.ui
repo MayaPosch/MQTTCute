@@ -55,23 +55,70 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="subscribeCheckBox">
-       <property name="text">
-        <string>Subscribe</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QCheckBox" name="subscribeCheckBox">
+         <property name="text">
+          <string>Subscribe</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="qosSpinBox">
+         <property name="prefix">
+          <string>QoS </string>
+         </property>
+         <property name="maximum">
+          <number>2</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="retainCheckbox">
+         <property name="text">
+          <string>Retain</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QTextEdit" name="subscribeTextEdit">
+    <widget class="QPlainTextEdit" name="subscribePlainTextEdit">
      <property name="font">
       <font>
        <family>Courier</family>
       </font>
      </property>
-     <property name="lineWrapMode">
-      <enum>QTextEdit::FixedColumnWidth</enum>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
      </property>
      <property name="readOnly">
       <bool>true</bool>
