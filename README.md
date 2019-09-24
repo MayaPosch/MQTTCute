@@ -22,7 +22,8 @@ The full list of dependencies is:
 
 * Qt 5.x.
 * POCO.
-* NymphMQTT.
+* [NymphMQTT](https://github.com/MayaPosch/NymphMQTT).
+* [ByteBauble](https://github.com/MayaPosch/ByteBauble).
 
 One can build the project using the Qt Creator IDE, or from the command line when in the project root:
 
