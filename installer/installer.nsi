@@ -47,7 +47,7 @@ SectionEnd */
 	InstallDirRegKey HKLM "Software\MQTTCute" ""
 
 	;Request application privileges for Windows Vista+
-	RequestExecutionLevel user
+	RequestExecutionLevel admin
 
 ;--------------------------------
 ;Interface Settings
