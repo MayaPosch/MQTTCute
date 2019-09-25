@@ -57,6 +57,7 @@ private slots:
     void windowClosing(std::string topic);
     void errorHandler(QString err);
     void about();
+	void donate();
     void quit();
     
 public slots:

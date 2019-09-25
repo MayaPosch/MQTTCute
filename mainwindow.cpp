@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->actionConnect, SIGNAL(triggered()), this, SLOT(connectRemote()));
     connect(ui->actionDisconnect, SIGNAL(triggered()), this, SLOT(disconnectRemote()));
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(about()));
+	connect(ui->actionDonate, SIGNAL(triggered()), this, SLOT(donate()));
     
     // Read configuration.
     QCoreApplication::setApplicationName("MQTTCute");
@@ -718,6 +719,18 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     }
     
     event->accept();
+}
+
+
+// --- DONATE ---
+// Shows the donate dialogue.
+void MainWindow::donate() {
+	QMessageBox msgBox(this);
+	msgBox.setWindowTitle(tr("Donate"));
+	msgBox.setIcon(QMessageBox::Question);
+	msgBox.setTextFormat(Qt::RichText);
+	msgBox.setText(tr("If you like the application and appreciate the effort behind developing and testing it, \nfeel free to donate any amount to the project: <a href=\"http://www.mayaposch.com/donate.php\">MayaPosch.com/donate.php</a>"));
+	msgBox.exec();
 }
 
 
