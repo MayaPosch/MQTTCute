@@ -82,3 +82,7 @@ At this point MQTTCute is still quite barebones. Features that are planned for i
 * Save open window state in session files.
 * Encrypt usernames and passwords for MQTT brokers in session files.
 * Etc.
+
+## Donate ##
+
+Developing MQTTCute and its dependencies costs a lot of time and effort. If you like the application and find it useful, you can donate any amount over at my personal website: [http://mayaposch.com/donate.php](http://mayaposch.com/donate.php)
