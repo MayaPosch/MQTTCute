@@ -12,7 +12,14 @@ MQTTCute is an MQTT desktop client written in C++/Qt. Its main focus is on being
 
 ## Installing ##
 
-For 64-bit Windows a binary installer is provided. See the [releases page](https://github.com/MayaPosch/MQTTCute/releases) for this project for a download link. This version should work on Windows 7 and up.
+For 64-bit Windows a binary installer is provided. See the [releases page](https://github.com/MayaPosch/MQTTCute/releases) for this project for a download link. This version should work on Windows 7 and up:
+
+* [MQTTCute_installer.exe](https://github.com/MayaPosch/MQTTCute/releases/download/v0.3-alpha/MQTTCute_installer.exe)
+
+A Linux (x64) binary is also available, make sure you have installed Qt5 ('qt5-default' on Ubuntu) and LibPoco ('libpoco-dev' on Ubuntu) before launching the binary:
+
+* [MQTTCute_0.3a.bz2](https://github.com/MayaPosch/MQTTCute/releases/download/v0.3-alpha/MQTTCute_0.3a.bz2)
+
 
 ## Building ##
 
