@@ -38,7 +38,7 @@ SectionEnd */
 
 	;Name and file
 	Name "MQTTCute"
-	OutFile "MQTTCute_installer.exe"
+	OutFile "MQTTCute_installer_0.3a.exe"
 
 	;Default installation folder
 	InstallDir "$PROGRAMFILES\MQTTCute"
@@ -78,22 +78,30 @@ Section "MQTTCute"
 
 	File "MQTTCute.exe"
 	File /r *.dll
-	;File "iconengines/*.dll"
-	;File "platforms/*.dll"
-	;File "styles/*.dll"
-	;File "translations/*.qm"
 	
+	; Request access to the 64-bit registry.
+	SetRegView 64
 
-	;Store installation folder
+	; Store installation folder
 	WriteRegStr HKLM "Software\MQTTCute" "" $INSTDIR
 
-	;Create uninstaller
+	; Create uninstaller
 	WriteUninstaller "$INSTDIR\uninstall.exe"
+	
+	; Register uninstaller
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MQTTCute"	"DisplayName" "MQTTCute" ;The Name shown in the dialog
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MQTTCute" "UninstallString" "$INSTDIR\uninstall.exe"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MQTTCute" "InstallLocation" "$INSTDIR"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MQTTCute" "Publisher" "Maya Posch/Nyanko"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MQTTCute" "HelpLink" "http://www.mayaposch.com/mqttcute.php"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MQTTCute" "DisplayVersion" "0.3-alpha"
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MQTTCute" "NoModify" 1 ; The installers does not offer a possibility to modify the installation
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MQTTCute" "NoRepair" 1 ; The installers does not offer a possibility to repair the installation
   
 	; Create a shortcuts in the start menu programs directory.
 	CreateDirectory "$SMPROGRAMS\MQTTCute"
     CreateShortCut "$SMPROGRAMS\MQTTCute\MQTTCute.lnk" "$INSTDIR\MQTTCute.exe"
-    CreateShortCut "$SMPROGRAMS\MQTTCute\Uninstall MQTTCute.lnk" "$INSTDIR\uninstall.exe"
+    ;CreateShortCut "$SMPROGRAMS\MQTTCute\Uninstall MQTTCute.lnk" "$INSTDIR\uninstall.exe"
 SectionEnd
 
 ;--------------------------------
@@ -122,8 +130,12 @@ Section "un.Uninstall Section"
 	Delete "$INSTDIR\uninstall.exe"
 
 	RMDir /r "$INSTDIR"
+	
+	; Request access to the 64-bit registry.
+	SetRegView 64
 
 	DeleteRegKey /ifempty HKLM "Software\MQTTCute"
+	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MQTTCute"
   
 	Delete "$SMPROGRAMS\MQTTCute\MQTTCute.lnk"
     Delete "$SMPROGRAMS\MQTTCute\Uninstall MQTTCute.lnk"
