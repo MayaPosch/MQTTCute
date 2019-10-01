@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=MQTTCute
+Comment=An advanced desktop MQTT client, suitable for binary protocol development and monitoring
+Exec=MQTTCute
+Icon=mqttcute
+Categories=Network;
