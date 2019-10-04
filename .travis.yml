@@ -1,0 +1,59 @@
+language: cpp
+compiler: gcc
+sudo: require
+dist: xenial
+
+env:
+  - CC=gcc-5 CXX=g++-5 CXX_COMPILER=g++-5 C_COMPILER=gcc-5
+
+before_install:
+  - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-xenial -y
+  - sudo apt-get update -qq
+
+install:
+  - sudo apt-get -y --allow-unauthenticated install qt510base libgl1-mesa-dev cpp-5 libssl-dev libcurl4-openssl-dev
+  - source /opt/qt*/bin/qt*-env.sh
+
+script:
+  # POCO
+  - wget https://github.com/pocoproject/poco/archive/poco-1.9.4-release.tar.gz
+  - tar -xf poco-*-release.tar.gz
+  - cd poco-poco-*-release
+  - mkdir cmake_build
+  - cd cmake_build
+  - export POCO_OPTS="-DENABLE_DATA_MYSQL=off -DENABLE_DATA_ODBC=off -DENABLE_DATA_SQLITE=off"
+  - export POCO_OPTS="$POCO_OPTS -DENABLE_MONGODB=off -DENABLE_PAGECOMPILER=off"
+  - export POCO_OPTS="$POCO_OPTS -DENABLE_PAGECOMPILER_FILE2PAGE=off -DENABLE_PDF=off -DENABLE_XML=off -DENABLE_ZIP=off"
+  - cmake -DCMAKE_INSTALL_PREFIX=/usr -D CMAKE_CXX_COMPILER=`which ${CXX_COMPILER}` -DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS" -DCMAKE_EXE_LINKER_FLAGS="$CMAKE_EXE_LINKER_FLAGS" $POCO_OPTS  ..
+  - sudo make install
+  - cd ../..
+  # ByteBauble
+  - git clone https://github.com/MayaPosch/ByteBauble
+  - make -C ByteBauble/src/cpp/ lib
+  - sudo cp ByteBauble/src/cpp/lib/libbytebauble.a /usr/lib/.
+  - sudo cp ByteBauble/src/cpp/src/*.h /usr/include/
+  # NymphMQTT
+  - git clone https://github.com/MayaPosch/NymphMQTT
+  - make -C NymphMQTT/src/ lib
+  - sudo cp NymphMQTT/src/lib/libnymphmqtt.a /usr/lib/
+  - sudo mkdir /usr/include/nymphmqtt
+  - sudo cp NymphMQTT/src/cpp/*.h /usr/include/nymphmqtt/
+  # MQTTCute
+  - qmake CONFIG+=release PREFIX=/usr
+  - make -j$(nproc)
+  # make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
+  - mkdir -p appdir/usr/bin ; cp MQTTCute appdir/usr/bin/
+  - mkdir -p appdir/usr/share/applications ; cp mqttcute.desktop appdir/usr/share/applications/
+  - mkdir -p appdir/usr/share/icons/hicolor/256x256/apps/ ; cp mqttcute.png appdir/usr/share/icons/hicolor/256x256/apps/
+  - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+  - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage
+
+after_success:
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash upload.sh MQTTCute*.AppImage*
+  
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/
