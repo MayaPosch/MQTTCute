@@ -4,6 +4,8 @@
 
 **Revised:** 2019/09/22
 
+![](https://travis-ci.com/MayaPosch/MQTTCute.svg?branch=master)
+
 ## Overview ##
 
 MQTTCute is an MQTT desktop client written in C++/Qt. Its main focus is on being helpful with the debugging and monitoring of MQTT-based systems which use binary protocols.
@@ -82,14 +84,11 @@ Use the menu options underneath **Session** to load sessions and create new ones
 
 ## TODO ##
 
-At this point MQTTCute is still quite barebones. Features that are planned for inclusion are:
-
 * Better and customisable received message formatting and copying.
 * History function and loading of external files for publishing.
 * Save open window state in session files.
 * Encrypt usernames and passwords for MQTT brokers in session files.
-* Etc.
 
 ## Donate ##
 
-Developing MQTTCute and its dependencies costs a lot of time and effort. If you like the application and find it useful, you can donate any amount over at my personal website: [http://mayaposch.com/donate.php](http://mayaposch.com/donate.php)
+If you like the application and find it useful, you can [donate](http://mayaposch.com/donate.php) any amount.
